@@ -1,0 +1,25 @@
+$ next build
+⚠ `eslint` configuration in next.config.ts is no longer supported. See more info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
+⚠ Invalid next.config.ts options detected: 
+⚠     Unrecognized key(s) in object: 'eslint'
+⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+▲ Next.js 16.2.9 (Turbopack)
+- Environments: .env.local, .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 9.2s
+  Skipping validation of types
+  Finished TypeScript config validation in 63ms ...
+  Collecting page data using 10 workers ...
+◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+  Generating static pages using 10 workers (0/8) ...
+Error occurred prerendering page "/dashboard/overview". Read more: https://nextjs.org/docs/messages/prerender-error
+ReferenceError: cn is not defined
+    at <unknown> (C:\code\attracted\.next\server\chunks\ssr\_1wuneaa._.js:1:393217)
+    at Array.map (<anonymous>)
+    at <unknown> (C:\code\attracted\.next\server\chunks\ssr\_1wuneaa._.js:1:392418) {
+  digest: '407801465'
+}
+Export encountered an error on /dashboard/overview/page: /dashboard/overview, exiting the build.
+⨯ Next.js build worker exited with code: 1 and signal: null
+error: script "build" exited with code 1
