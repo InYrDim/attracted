@@ -1,0 +1,250 @@
+"use client";
+import { useState, useMemo } from "react";
+import { Search, Send, Paperclip, Smile, MoreVertical, Filter, Phone, User, MapPin, Tag, Clock, ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { sendInboxMessage } from "@/actions/inbox";
+import { ConversationWithRelations } from "@/types";
+
+const channelColors: Record<string, string> = {
+  WhatsApp: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400",
+  Instagram: "bg-pink-50 text-pink-700 dark:bg-pink-500/10 dark:text-pink-400",
+  TikTok: "bg-slate-50 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400",
+  "Web Form": "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400",
+  "Manual Entry": "bg-gray-50 text-gray-700 dark:bg-gray-500/10 dark:text-gray-400"
+};
+
+const templates = ["Halo, terima kasih sudah menghubungi kami!", "Baik, saya akan segera proses pesanan Anda.", "Ada yang bisa saya bantu?"];
+
+export function InboxClient({ initialConversations }: { initialConversations: ConversationWithRelations[] }) {
+  const [selectedConvId, setSelectedConvId] = useState<string | null>(initialConversations[0]?.id || null);
+  const [search, setSearch] = useState("");
+  const [msgText, setMsgText] = useState("");
+  const [filter, setFilter] = useState<string | null>(null);
+  const [isSending, setIsSending] = useState(false);
+
+  const filtered = useMemo(() => {
+    return initialConversations.filter((c) => {
+      const channelName = c.channel?.name || "Manual Entry";
+      const leadName = c.lead?.name || "Unknown";
+      if (filter && channelName !== filter) return false;
+      if (search && !leadName.toLowerCase().includes(search.toLowerCase())) return false;
+      return true;
+    });
+  }, [initialConversations, filter, search]);
+
+  const selected = initialConversations.find(c => c.id === selectedConvId) || filtered[0];
+
+  const handleSend = async () => {
+    if (!msgText.trim() || !selected) return;
+    setIsSending(true);
+    await sendInboxMessage(selected.id, msgText.trim());
+    setMsgText("");
+    setIsSending(false);
+  };
+
+  return (
+    <div className="h-[calc(100dvh-56px)] flex">
+      <div className="hidden md:flex w-80 flex-col border-r border-border bg-muted/20">
+        <div className="p-3 space-y-2 border-b border-border">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input placeholder="Search conversations..." className="h-8 pl-8 rounded-md text-xs bg-background" value={search} onChange={(e) => setSearch(e.target.value)} />
+            </div>
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+              <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+            </Button>
+          </div>
+          <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+            {["WhatsApp", "Instagram", "TikTok", "Manual Entry"].map((ch) => (
+              <button key={ch} onClick={() => setFilter(filter === ch ? null : ch)} className={cn(
+                "shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium border transition-colors",
+                filter === ch ? "bg-primary text-primary-foreground border-primary" : "bg-background border-border text-muted-foreground hover:border-border"
+              )}>
+                {ch}
+              </button>
+            ))}
+          </div>
+        </div>
+        <ScrollArea className="flex-1">
+          {filtered.length === 0 ? (
+            <div className="p-4 text-center text-xs text-muted-foreground">No conversations found.</div>
+          ) : filtered.map((conv) => {
+            const leadName = conv.lead?.name || "Unknown";
+            const initials = leadName.substring(0, 2).toUpperCase();
+            const channelName = conv.channel?.name || "Manual Entry";
+            const lastMsg = conv.messages && conv.messages.length > 0 ? conv.messages[conv.messages.length - 1] : null;
+
+            return (
+              <button key={conv.id} onClick={() => setSelectedConvId(conv.id)} className={cn(
+                "flex w-full items-start gap-3 px-3 py-3 border-b border-border/40 transition-colors text-left",
+                selected?.id === conv.id ? "bg-accent/60 border-l-2 border-l-primary" : "hover:bg-accent/30 border-l-2 border-l-transparent"
+              )}>
+                <div className="relative shrink-0">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-xs font-semibold text-accent-foreground">
+                    {initials}
+                  </div>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-medium truncate">{leadName}</p>
+                    <span className="shrink-0 text-[10px] text-muted-foreground">{conv.lastMessageAt ? new Date(conv.lastMessageAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ""}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">{lastMsg ? lastMsg.content : "No messages yet"}</p>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <Badge variant="secondary" className={cn("text-[10px] h-4 px-1.5 border-0 rounded", channelColors[channelName] || channelColors["Manual Entry"])}>
+                      {channelName}
+                    </Badge>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </ScrollArea>
+      </div>
+
+      <div className="hidden md:flex flex-1 flex-col bg-background">
+        {selected ? (
+          <>
+            <div className="flex items-center gap-3 px-4 h-14 border-b border-border shrink-0">
+              <button className="md:hidden mr-1">
+                <ArrowLeft className="h-4 w-4 text-muted-foreground" />
+              </button>
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-xs font-semibold">
+                {(selected.lead?.name || "U").substring(0,2).toUpperCase()}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium truncate">{selected.lead?.name}</p>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className={cn("text-[10px] h-4 px-1.5 border-0 rounded", channelColors[selected.channel?.name || "Manual Entry"])}>
+                    {selected.channel?.name || "Manual Entry"}
+                  </Badge>
+                  <span className="text-[11px] text-muted-foreground capitalize">{(selected.lead?.status || "").replace("_", " ")}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-8 w-8"><Phone className="h-3.5 w-3.5 text-muted-foreground" /></Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <MoreVertical className="h-3.5 w-3.5 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>View Lead Profile</DropdownMenuItem>
+                    <DropdownMenuItem>Assign to Agent</DropdownMenuItem>
+                    <DropdownMenuItem>Create Order</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+            
+            <ScrollArea className="flex-1 px-4">
+              <div className="py-4 space-y-4 max-w-2xl mx-auto">
+                {(!selected.messages || selected.messages.length === 0) && (
+                   <div className="text-center text-xs text-muted-foreground mt-4">No messages yet.</div>
+                )}
+                {(selected.messages || []).map((msg, i: number) => (
+                  <div key={i} className={cn("flex", msg.senderType === "agent" ? "justify-end" : "justify-start")}>
+                    <div className={cn("max-w-[75%] rounded-2xl px-4 py-2.5 text-sm", msg.senderType === "agent" ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-muted text-foreground rounded-bl-sm")}>
+                      <p className="leading-relaxed">{msg.content}</p>
+                      <p className={cn("text-[10px] mt-1", msg.senderType === "agent" ? "text-primary-foreground/70 text-right" : "text-muted-foreground")}>
+                        {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            
+            <div className="shrink-0 border-t border-border p-3 bg-muted/10">
+              <div className="flex items-end gap-2 max-w-3xl mx-auto">
+                <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9 text-muted-foreground"><Paperclip className="h-4 w-4" /></Button>
+                <div className="flex-1 relative">
+                  <Input 
+                    placeholder="Type a message..." 
+                    className="h-10 pr-16 rounded-xl border-muted-foreground/20 bg-background" 
+                    value={msgText} 
+                    onChange={(e) => setMsgText(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                  />
+                  <div className="absolute right-1.5 bottom-1.5 flex items-center gap-0.5">
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md"><Smile className="h-4 w-4 text-muted-foreground" /></Button>
+                    <Button onClick={handleSend} disabled={isSending} size="sm" className="h-7 rounded-md px-3">
+                      <Send className="h-3.5 w-3.5" /> Send
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-1.5 mt-2 max-w-3xl mx-auto overflow-x-auto pb-0.5">
+                {templates.map((t) => (
+                  <button key={t} onClick={() => setMsgText(t)} className="shrink-0 rounded-md border border-border bg-background px-2.5 py-1 text-[11px] text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+            Select a conversation to start messaging
+          </div>
+        )}
+      </div>
+
+      {selected && (
+        <div className="hidden lg:flex w-72 flex-col border-l border-border bg-muted/10">
+          <div className="p-4 border-b border-border">
+            <h3 className="text-xs font-semibold tracking-wide uppercase text-muted-foreground mb-3">Lead Context</h3>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-xs font-semibold">
+                  {(selected.lead?.name || "U").substring(0, 2).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{selected.lead?.name}</p>
+                  <p className="text-[11px] text-muted-foreground capitalize">{(selected.lead?.status || "").replace("_", " ")}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {selected.lead?.phone && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <Phone className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-muted-foreground">{selected.lead.phone}</span>
+                  </div>
+                )}
+                {selected.lead?.email && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <MapPin className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-muted-foreground">{selected.lead.email}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="p-4 space-y-2">
+            <Button variant="secondary" className="w-full h-9 text-xs justify-start">
+              <User className="h-3.5 w-3.5 mr-2" /> Assign Agent
+            </Button>
+            <Button variant="secondary" className="w-full h-9 text-xs justify-start">
+              <Tag className="h-3.5 w-3.5 mr-2" /> Change Status
+            </Button>
+            <Button variant="secondary" className="w-full h-9 text-xs justify-start">
+              <ArrowLeft className="h-3.5 w-3.5 mr-2 rotate-180" /> Create Order
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

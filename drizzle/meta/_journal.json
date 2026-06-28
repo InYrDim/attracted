@@ -8,6 +8,13 @@
       "when": 1782542464994,
       "tag": "0000_warm_goliath",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782567059643,
+      "tag": "0001_stiff_sabra",
+      "breakpoints": true
     }
   ]
 }

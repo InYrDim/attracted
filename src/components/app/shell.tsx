@@ -78,7 +78,7 @@ function SidebarItem({ item, pathname, collapsed }: { item: typeof navItems[0]; 
   );
 }
 
-function SidebarDesktop({ collapsed, onClose }: { collapsed: boolean; onClose: () => void }) {
+function SidebarDesktop({ collapsed, onClose, business }: { collapsed: boolean; onClose: () => void; business: any }) {
   const pathname = usePathname();
   return (
     <aside
@@ -93,10 +93,10 @@ function SidebarDesktop({ collapsed, onClose }: { collapsed: boolean; onClose: (
           collapsed && "justify-center px-2",
         )}
       >
-        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-bold">
-          A
+        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-bold uppercase shrink-0">
+          {business?.name?.charAt(0) || "A"}
         </div>
-        {!collapsed && <span className="font-semibold text-[15px] tracking-tight">Attract</span>}
+        {!collapsed && <span className="font-semibold text-[15px] tracking-tight truncate">{business?.name || "Attract"}</span>}
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-3">
         {navItems.map((item, i) => (
@@ -118,16 +118,16 @@ function SidebarDesktop({ collapsed, onClose }: { collapsed: boolean; onClose: (
   );
 }
 
-function SidebarMobile({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+function SidebarMobile({ open, onOpenChange, business }: { open: boolean; onOpenChange: (open: boolean) => void; business: any }) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="w-[260px] p-0">
         <SheetTitle className="sr-only">Navigation</SheetTitle>
         <div className="flex h-14 items-center border-b border-border px-4 gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-bold">
-            A
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-bold uppercase shrink-0">
+            {business?.name?.charAt(0) || "A"}
           </div>
-          <span className="font-semibold text-[15px] tracking-tight">Attract</span>
+          <span className="font-semibold text-[15px] tracking-tight truncate">{business?.name || "Attract"}</span>
         </div>
         <nav className="space-y-1 overflow-y-auto px-2 py-3">
           {navItems.map((item, i) => (
@@ -139,7 +139,7 @@ function SidebarMobile({ open, onOpenChange }: { open: boolean; onOpenChange: (o
   );
 }
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({ children, user, business }: { children: React.ReactNode; user?: any; business?: any }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -148,7 +148,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh bg-background text-foreground flex">
-      <SidebarDesktop collapsed={collapsed} onClose={() => setCollapsed(true)} />
+      <SidebarDesktop collapsed={collapsed} onClose={() => setCollapsed(true)} business={business} />
       {collapsed && (
         <Button
           variant="ghost"
@@ -159,7 +159,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <ChevronRight className="h-4 w-4" />
         </Button>
       )}
-      <SidebarMobile open={mobileOpen} onOpenChange={setMobileOpen} />
+      <SidebarMobile open={mobileOpen} onOpenChange={setMobileOpen} business={business} />
       <div
         className="flex-1 flex flex-col min-w-0 transition-all duration-200"
       >
@@ -173,7 +173,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="text-xs">Pro Plan</Badge>
-              <div className="h-8 w-8 rounded-full bg-accent ring-2 ring-border" />
+              {user?.image ? (
+                <img src={user.image} alt={user.name} className="h-8 w-8 rounded-full ring-2 ring-border object-cover" />
+              ) : (
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent ring-2 ring-border text-xs font-semibold uppercase">
+                  {user?.name?.charAt(0) || "U"}
+                </div>
+              )}
             </div>
           </header>
         )}

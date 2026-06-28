@@ -12,7 +12,7 @@
 
 ### ISSUE-001: Multi-tenant DB Schema
 
-**Priority:** P0 | **Status:** 🔴
+**Priority:** P0 | **Status:** 🟢
 
 Implement all application tables in `src/db/schema.ts`:
 
@@ -49,7 +49,7 @@ Implement all application tables in `src/db/schema.ts`:
 
 ### ISSUE-002: Multi-tenant Auth & RBAC
 
-**Priority:** P0 | **Status:** 🔴
+**Priority:** P0 | **Status:** 🟡
 
 Extend better-auth in `src/lib/auth.ts` to support multi-tenancy and role-based access.
 
@@ -72,7 +72,7 @@ Extend better-auth in `src/lib/auth.ts` to support multi-tenancy and role-based 
 
 ### ISSUE-003: App Shell & Navigation
 
-**Priority:** P0 | **Status:** 🔴
+**Priority:** P0 | **Status:** 🟢
 
 Build the authenticated app layout with sidebar navigation.
 
@@ -116,7 +116,7 @@ Build the authenticated app layout with sidebar navigation.
 
 ### ISSUE-004: Lead Management
 
-**Priority:** P0 | **Status:** 🔴
+**Priority:** P0 | **Status:** 🟡
 
 Implement lead CRUD, pipeline view, and assignment.
 
@@ -140,7 +140,7 @@ Implement lead CRUD, pipeline view, and assignment.
 
 ### ISSUE-005: Unified Inbox
 
-**Priority:** P0 | **Status:** 🔴
+**Priority:** P0 | **Status:** 🟡
 
 Build the central messaging inbox for CS agents.
 
@@ -168,7 +168,7 @@ Build the central messaging inbox for CS agents.
 
 ### ISSUE-006: Order Management
 
-**Priority:** P1 | **Status:** 🔴
+**Priority:** P1 | **Status:** 🟡
 
 Implement order creation from leads and order tracking.
 
@@ -191,7 +191,7 @@ Implement order creation from leads and order tracking.
 
 ### ISSUE-007: Product Management
 
-**Priority:** P1 | **Status:** 🔴
+**Priority:** P1 | **Status:** 🟡
 
 CRUD for products and variants per business.
 
@@ -361,7 +361,7 @@ Send conversion data to Google Ads.
 
 ### ISSUE-015: Ad Account Management UI
 
-**Priority:** P1 | **Status:** 🔴
+**Priority:** P1 | **Status:** 🟡
 
 Settings UI to connect and manage ad accounts.
 
@@ -405,7 +405,7 @@ Calculate shipping cost and generate tracking numbers.
 
 ### ISSUE-017: Automation Rule Engine
 
-**Priority:** P1 | **Status:** 🔴
+**Priority:** P1 | **Status:** 🟡
 
 IF-THEN rule engine configurable per business.
 
@@ -461,7 +461,7 @@ Capture ad click metadata and attribute leads to specific ads.
 
 ### ISSUE-019: Dashboard Overview
 
-**Priority:** P1 | **Status:** 🔴
+**Priority:** P1 | **Status:** 🟢
 
 Main dashboard with key business metrics.
 
@@ -548,7 +548,7 @@ Agent/CS analytics.
 
 ### ISSUE-023: Team Management
 
-**Priority:** P1 | **Status:** 🔴
+**Priority:** P1 | **Status:** 🟡
 
 Invite and manage team members.
 
@@ -569,7 +569,7 @@ Invite and manage team members.
 
 ### ISSUE-024: Billing & Plans
 
-**Priority:** P2 | **Status:** 🔴
+**Priority:** P2 | **Status:** 🟡
 
 Subscription management with usage limits.
 
