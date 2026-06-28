@@ -237,7 +237,7 @@ Connect WhatsApp as a channel for inbound/outbound messaging.
 
 ### ISSUE-009: Instagram DM Integration (Meta Graph API)
 
-**Priority:** P1 | **Status:** 🔴
+**Priority:** P1 | **Status:** 🟢
 
 Connect Instagram as a channel via Meta Graph API.
 
@@ -597,7 +597,7 @@ Subscription management with usage limits.
 
 ### ISSUE-025: Onboarding Flow
 
-**Priority:** P1 | **Status:** 🔴
+**Priority:** P1 | **Status:** 🟢
 
 Guided setup for new businesses.
 

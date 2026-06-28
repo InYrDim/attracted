@@ -19,27 +19,86 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { createWebFormChannel } from "@/actions/channels";
+import { createWebFormChannel, createInstagramChannel, createWhatsAppChannel, deleteChannel } from "@/actions/channels";
 import { Channel } from "@/types";
 
 export default function ChannelsClient({ initialChannels }: { initialChannels: Channel[] }) {
   const [channels, setChannels] = useState(initialChannels);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isInstagramModalOpen, setIsInstagramModalOpen] = useState(false);
+  const [isWhatsappModalOpen, setIsWhatsappModalOpen] = useState(false);
+  
   const [formName, setFormName] = useState("");
   const [requireEmail, setRequireEmail] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [igName, setIgName] = useState("");
+  const [igAccountId, setIgAccountId] = useState("");
+  const [igToken, setIgToken] = useState("");
+  const [igVerifyToken, setIgVerifyToken] = useState("");
+
+  const [waName, setWaName] = useState("");
+  const [waPhoneNumberId, setWaPhoneNumberId] = useState("");
+  const [waToken, setWaToken] = useState("");
+  const [waVerifyToken, setWaVerifyToken] = useState("");
 
   const handleCreateForm = async () => {
     if (!formName.trim()) return;
     setIsSubmitting(true);
     try {
-      const newForm = await createWebFormChannel({ name: formName, requireEmail });
-      // reload page or optimistically add
+      await createWebFormChannel({ name: formName, requireEmail });
       window.location.reload();
     } catch (e) {
       console.error(e);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCreateInstagram = async () => {
+    if (!igName.trim() || !igAccountId.trim() || !igToken.trim() || !igVerifyToken.trim()) return;
+    setIsSubmitting(true);
+    try {
+      await createInstagramChannel({
+        name: igName,
+        igAccountId,
+        accessToken: igToken,
+        verifyToken: igVerifyToken
+      });
+      window.location.reload();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCreateWhatsapp = async () => {
+    if (!waName.trim() || !waPhoneNumberId.trim() || !waToken.trim() || !waVerifyToken.trim()) return;
+    setIsSubmitting(true);
+    try {
+      await createWhatsAppChannel({
+        name: waName,
+        phoneNumberId: waPhoneNumberId,
+        accessToken: waToken,
+        verifyToken: waVerifyToken
+      });
+      window.location.reload();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this channel?")) {
+      try {
+        await deleteChannel(id);
+        window.location.reload();
+      } catch (e) {
+        console.error(e);
+      }
     }
   };
 
@@ -94,7 +153,32 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: C
                       </button>
                     </div>
                   )}
-                  {ch.type === "whatsapp" && <p>WhatsApp Channel</p>}
+                  {ch.type === "whatsapp" && (
+                    <div className="space-y-1">
+                      <p>WhatsApp Channel</p>
+                      {config?.webhookUrl && (
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[10px] truncate max-w-[200px]">Webhook: {config.webhookUrl}</span>
+                          <button onClick={() => copyToClipboard(window.location.origin + config.webhookUrl)} className="hover:text-foreground">
+                            <Copy className="h-3 w-3" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {ch.type === "instagram" && (
+                    <div className="space-y-1">
+                      <p>Instagram Channel ({config?.igAccountId})</p>
+                      {config?.webhookUrl && (
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[10px] truncate max-w-[200px]">Webhook: {config.webhookUrl}</span>
+                          <button onClick={() => copyToClipboard(window.location.origin + config.webhookUrl)} className="hover:text-foreground">
+                            <Copy className="h-3 w-3" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <p>Created: {new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(ch.createdAt))}</p>
                 </div>
                 <div className="flex items-center gap-2 pt-1">
@@ -106,7 +190,7 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: C
                       </Button>
                     </>
                   )}
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(ch.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                 </div>
               </div>
             </Card>
@@ -123,7 +207,99 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: C
           <p className="text-sm font-medium">Add Web Form</p>
           <p className="text-xs text-muted-foreground mt-1">Create an endpoint to capture leads</p>
         </Card>
+
+        <Card 
+          className="border-border/60 border-dashed flex flex-col items-center justify-center p-8 min-h-[180px] cursor-pointer hover:bg-accent/20 transition-colors"
+          onClick={() => setIsInstagramModalOpen(true)}
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent mb-3">
+            <Plus className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-medium">Connect Instagram</p>
+          <p className="text-xs text-muted-foreground mt-1">Receive DMs in Unified Inbox</p>
+        </Card>
+
+        <Card 
+          className="border-border/60 border-dashed flex flex-col items-center justify-center p-8 min-h-[180px] cursor-pointer hover:bg-accent/20 transition-colors"
+          onClick={() => setIsWhatsappModalOpen(true)}
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent mb-3">
+            <Plus className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-medium">Connect WhatsApp</p>
+          <p className="text-xs text-muted-foreground mt-1">WhatsApp Business API</p>
+        </Card>
       </div>
+
+      <Dialog open={isWhatsappModalOpen} onOpenChange={setIsWhatsappModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Connect WhatsApp Business</DialogTitle>
+            <DialogDescription>
+              Connect via Meta Graph API to receive and reply to WhatsApp messages.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Channel Name</Label>
+              <Input placeholder="e.g., WA Customer Service" value={waName} onChange={(e) => setWaName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Phone Number ID</Label>
+              <Input placeholder="Phone Number ID (from Graph API)" value={waPhoneNumberId} onChange={(e) => setWaPhoneNumberId(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>System User Access Token</Label>
+              <Input type="password" placeholder="System user access token" value={waToken} onChange={(e) => setWaToken(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Webhook Verify Token</Label>
+              <Input placeholder="Token for webhook challenge" value={waVerifyToken} onChange={(e) => setWaVerifyToken(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsWhatsappModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateWhatsapp} disabled={isSubmitting || !waName || !waPhoneNumberId || !waToken || !waVerifyToken}>
+              {isSubmitting ? "Connecting..." : "Connect WhatsApp"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isInstagramModalOpen} onOpenChange={setIsInstagramModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Connect Instagram Business</DialogTitle>
+            <DialogDescription>
+              Connect via Meta Graph API to receive and reply to DMs.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Channel Name</Label>
+              <Input placeholder="e.g., IG Official Store" value={igName} onChange={(e) => setIgName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Instagram Account ID</Label>
+              <Input placeholder="IG account ID (from Graph API)" value={igAccountId} onChange={(e) => setIgAccountId(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Page Access Token</Label>
+              <Input type="password" placeholder="System user access token" value={igToken} onChange={(e) => setIgToken(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Webhook Verify Token</Label>
+              <Input placeholder="Token for webhook challenge" value={igVerifyToken} onChange={(e) => setIgVerifyToken(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsInstagramModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateInstagram} disabled={isSubmitting || !igName || !igAccountId || !igToken || !igVerifyToken}>
+              {isSubmitting ? "Connecting..." : "Connect Instagram"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isFormModalOpen} onOpenChange={setIsFormModalOpen}>
         <DialogContent>

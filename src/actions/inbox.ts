@@ -4,6 +4,7 @@ import { conversation, message } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
+import { sendInstagramMessage } from "@/lib/instagram";
 import { requireBusinessMember } from "@/lib/auth-utils";
 import crypto from "crypto";
 
@@ -51,6 +52,24 @@ export async function sendInboxMessage(conversationId: string, content: string) 
       } catch (error) {
         console.error("Failed to send WA message:", error);
         throw new Error("Failed to send WhatsApp message");
+      }
+    }
+  }
+
+  // Send external message if channel is Instagram
+  if (conv.channel?.type === "instagram") {
+    const config = conv.channel.config as any;
+    if (config?.igAccountId && config?.accessToken && conv.lead?.phone) {
+      try {
+        await sendInstagramMessage({
+          igAccountId: config.igAccountId,
+          accessToken: config.accessToken,
+          to: conv.lead.phone,
+          text: content,
+        });
+      } catch (error) {
+        console.error("Failed to send IG message:", error);
+        throw new Error("Failed to send Instagram message");
       }
     }
   }
