@@ -4,6 +4,13 @@
 - Next.js 16 with breaking changes. READ `node_modules/next/dist/docs/` before touching Next.js APIs.
 - Path alias: `@/*` → `./src/*`.
 
+## STRICT RULES (MUST FOLLOW)
+
+- **TYPESCRIPT**: STRICT TYPING ONLY. NEVER use `any`.
+- **SHARED TYPES**: All custom DB relation types MUST be defined and exported from `src/types/index.ts` (e.g., `LeadWithRelations`, `OrderWithRelations`). ALWAYS import types from this directory.
+- **NATIVE HTML FORBIDDEN**: NEVER use native HTML tags for UI elements (`<button>`, `<input>`, `<select>`, `<textarea>`, `<label>`, `<table>`, `<a>`).
+- **UI COMPONENTS REQUIRED**: ALWAYS import and use predefined UI components from `@/components/ui/*` (e.g., `Button`, `Input`, `Select`, `Label`, `Table`). Use `Link` from `next/link` for navigation.
+
 ## Commands
 
 - `bun run dev` — dev server
