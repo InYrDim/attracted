@@ -17,19 +17,17 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await signIn.email({
+    const { error } = await signIn.email({
       email,
       password,
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/dashboard");
-          router.refresh();
-        },
-        onError: (ctx) => {
-          toast.error(ctx.error.message || "Failed to log in");
-        }
-      }
+      callbackURL: "/dashboard",
     });
+    if (error) {
+      toast.error(error.message || "Failed to log in");
+    } else {
+      router.push("/dashboard");
+      router.refresh();
+    }
     setLoading(false);
   };
 

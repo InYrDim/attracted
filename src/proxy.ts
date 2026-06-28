@@ -26,21 +26,20 @@ export async function proxy(request: NextRequest) {
     request.cookies.get("better-auth.session_token") ||
     request.cookies.get("__Secure-better-auth.session_token");
 
-  if (sessionCookie) {
-    try {
-      const res = await fetch(
-        new URL("/api/auth/get-session", request.url).toString(),
-        {
-          headers: { cookie: request.headers.get("cookie") || "" },
-        },
-      );
-      if (res.ok) {
-        const data = await res.json();
-        isAuthenticated = !!data?.session;
-      }
-    } catch (e) {
-      console.error("Proxy session fetch error:", e);
+  try {
+    const res = await fetch(
+      new URL("/api/auth/get-session", request.url).toString(),
+      {
+        method: "GET",
+        headers: { cookie: request.headers.get("cookie") || "" },
+      },
+    );
+    if (res.ok) {
+      const data = await res.json();
+      isAuthenticated = !!data?.session;
     }
+  } catch (e) {
+    console.error("Proxy session fetch error:", e);
   }
 
   if (isProtected && !isAuthenticated) {
