@@ -7,8 +7,10 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { OrderWithRelations, Order } from "@/types";
 import { sendMetaEvent } from "@/lib/meta-capi";
+import { sendTikTokEvent } from "@/lib/tiktok-capi";
 import { requireBusinessMember } from "@/lib/auth-utils";
 import crypto from "crypto";
+import { generateTrackingNumber } from "@/lib/shipping";
 
 export async function getOrders(): Promise<OrderWithRelations[]> {
   const { businessId } = await requireBusinessMember("agent");
@@ -45,8 +47,15 @@ export async function createOrder(data: {
     if (member) agentId = member.id;
   }
 
+  const orderId = `ord_${crypto.randomUUID()}`;
+  let trackingNumber = data.trackingNumber;
+
+  if (data.shippingCourier && (!trackingNumber || trackingNumber === "")) {
+    trackingNumber = await generateTrackingNumber(data.shippingCourier, orderId);
+  }
+
   await db.insert(order).values({
-    id: `ord_${crypto.randomUUID()}`,
+    id: orderId,
     businessId,
     leadId: data.leadId,
     agentId,
@@ -54,7 +63,7 @@ export async function createOrder(data: {
     totalPrice: data.totalPrice,
     shippingAddress: data.shippingAddress,
     shippingCourier: data.shippingCourier,
-    trackingNumber: data.trackingNumber,
+    trackingNumber: trackingNumber,
     status: "pending",
   });
 
@@ -72,6 +81,12 @@ export async function createOrder(data: {
     await sendMetaEvent(
       businessId, 
       "Purchase", 
+      { id: l.id, email: l.email, phone: l.phone, clickId: l.clickId },
+      data.totalPrice
+    );
+    await sendTikTokEvent(
+      businessId, 
+      "CompletePayment", 
       { id: l.id, email: l.email, phone: l.phone, clickId: l.clickId },
       data.totalPrice
     );

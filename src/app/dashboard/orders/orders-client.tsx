@@ -75,7 +75,8 @@ export function OrdersClient({
       items: [{ productId: selectedProductId, quantity: qty, price: selectedProduct!.basePrice }],
       totalPrice: total,
       shippingAddress: address,
-      shippingCourier: courier,
+      shippingCourier: courier === "none" ? undefined : courier,
+      trackingNumber: "", // The backend will generate this based on the courier
     });
     
     setIsCreating(false);
@@ -152,6 +153,7 @@ export function OrdersClient({
                     <Select value={courier} onValueChange={setCourier}>
                       <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select courier" /></SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="none">No Shipping</SelectItem>
                         <SelectItem value="jne">JNE</SelectItem>
                         <SelectItem value="sicepat">Sicepat</SelectItem>
                         <SelectItem value="jnt">J&T Express</SelectItem>
@@ -216,7 +218,10 @@ export function OrdersClient({
                   <TableCell className="px-4 py-3"><span className="text-xs font-mono text-indigo-600 dark:text-indigo-400 hover:underline">{order.id}</span></TableCell>
                   <TableCell className="px-4 py-3 font-medium">{order.lead?.name}</TableCell>
                   <TableCell className="px-4 py-3 text-muted-foreground text-xs hidden md:table-cell">{itemsCount} item(s)</TableCell>
-                  <TableCell className="px-4 py-3 text-muted-foreground text-xs hidden sm:table-cell uppercase">{order.shippingCourier || "—"}</TableCell>
+                  <TableCell className="px-4 py-3 text-muted-foreground text-xs hidden sm:table-cell uppercase">
+                    {order.shippingCourier || "—"}
+                    {order.trackingNumber && <div className="text-[10px] text-muted-foreground/70 normal-case mt-0.5">{order.trackingNumber}</div>}
+                  </TableCell>
                   <TableCell className="px-4 py-3">
                     <Select value={order.status} onValueChange={(val) => handleStatusChange(order.id, val)}>
                       <SelectTrigger className={cn("h-6 text-[10px] w-28 px-2 py-0 border-0 shadow-none font-medium", statusColors[order.status])}>

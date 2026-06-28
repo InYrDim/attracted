@@ -7,6 +7,7 @@ import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 import { Lead, LeadWithRelations, Message } from "@/types";
 import { sendMetaEvent } from "@/lib/meta-capi";
+import { sendTikTokEvent } from "@/lib/tiktok-capi";
 import { requireBusinessMember } from "@/lib/auth-utils";
 
 export async function ensureDefaultChannel(businessId: string) {
@@ -93,6 +94,13 @@ export async function createLead(data: {
     id: newId,
     email: data.email,
     phone: data.phone,
+  });
+
+  await sendTikTokEvent(businessId, "SubmitForm", {
+    id: newId,
+    email: data.email,
+    phone: data.phone,
+    clickId: data.clickId || recentClick?.clickId,
   });
 
   revalidatePath("/dashboard/leads");

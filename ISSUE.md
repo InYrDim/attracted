@@ -324,7 +324,7 @@ Send server-side conversion events to Meta Ads.
 
 ### ISSUE-013: Conversions API (CAPI) — TikTok
 
-**Priority:** P1 | **Status:** 🔴
+**Priority:** P1 | **Status:** 🟢
 
 Send server-side conversion events to TikTok Ads.
 
@@ -335,9 +335,9 @@ Send server-side conversion events to TikTok Ads.
 - SHA-256 hash PII
 
 **Acceptance Criteria:**
-- [ ] Events sent to TikTok on lead + order events
-- [ ] ttclid included for attribution
-- [ ] PII hashed
+- [x] Events sent to TikTok on lead + order events
+- [x] ttclid included for attribution
+- [x] PII hashed
 
 ---
 
@@ -383,7 +383,7 @@ Settings UI to connect and manage ad accounts.
 
 ### ISSUE-016: Shipping Integration (JNE, Sicepat, J&T)
 
-**Priority:** P2 | **Status:** 🔴
+**Priority:** P2 | **Status:** 🟢
 
 Calculate shipping cost and generate tracking numbers.
 
@@ -395,9 +395,9 @@ Calculate shipping cost and generate tracking numbers.
 - Display tracking info on order detail
 
 **Acceptance Criteria:**
-- [ ] Shipping cost calculator in order creation
-- [ ] Tracking number generated
-- [ ] Shipment status tracked and displayed
+- [x] Shipping cost calculator in order creation
+- [x] Tracking number generated
+- [x] Shipment status tracked and displayed
 
 ---
 
