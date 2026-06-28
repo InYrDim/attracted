@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { eq, and, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { sendWhatsAppMessage } from "@/lib/whatsapp";
 
 async function getBusinessId() {
   const reqHeaders = await headers();
@@ -40,10 +41,32 @@ export async function sendInboxMessage(conversationId: string, content: string) 
   
   // Verify conversation belongs to business
   const conv = await db.query.conversation.findFirst({
-    where: and(eq(conversation.id, conversationId), eq(conversation.businessId, businessId))
+    where: and(eq(conversation.id, conversationId), eq(conversation.businessId, businessId)),
+    with: {
+      channel: true,
+      lead: true,
+    }
   });
   
   if (!conv) throw new Error("Conversation not found");
+
+  // Send external message if channel is WhatsApp
+  if (conv.channel?.type === "whatsapp") {
+    const config = conv.channel.config as any;
+    if (config?.phoneNumberId && config?.accessToken && conv.lead?.phone) {
+      try {
+        await sendWhatsAppMessage({
+          phoneNumberId: config.phoneNumberId,
+          accessToken: config.accessToken,
+          to: conv.lead.phone,
+          text: content,
+        });
+      } catch (error) {
+        console.error("Failed to send WA message:", error);
+        throw new Error("Failed to send WhatsApp message");
+      }
+    }
+  }
 
   await db.insert(message).values({
     id: `msg_${crypto.randomUUID()}`,

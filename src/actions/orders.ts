@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { OrderWithRelations, Order } from "@/types";
+import { sendMetaEvent } from "@/lib/meta-capi";
 
 async function getBusinessId() {
   const reqHeaders = await headers();
@@ -72,6 +73,20 @@ export async function createOrder(data: {
   await db.update(lead)
     .set({ status: "order", updatedAt: new Date() })
     .where(and(eq(lead.id, data.leadId), eq(lead.businessId, businessId)));
+
+  // send Meta CAPI Purchase event
+  const l = await db.query.lead.findFirst({
+    where: and(eq(lead.id, data.leadId), eq(lead.businessId, businessId))
+  });
+
+  if (l) {
+    await sendMetaEvent(
+      businessId, 
+      "Purchase", 
+      { id: l.id, email: l.email, phone: l.phone, clickId: l.clickId },
+      data.totalPrice
+    );
+  }
 
   revalidatePath("/dashboard/orders");
   revalidatePath("/dashboard/leads");

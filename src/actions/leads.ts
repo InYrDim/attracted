@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { Lead, LeadWithRelations, Message } from "@/types";
+import { sendMetaEvent } from "@/lib/meta-capi";
 
 async function getBusinessId() {
   const reqHeaders = await headers();
@@ -61,8 +62,9 @@ export async function createLead(data: {
   const businessId = await getBusinessId();
   const channelId = await ensureDefaultChannel(businessId);
 
+  const newId = `ld_${crypto.randomUUID()}`;
   await db.insert(lead).values({
-    id: `ld_${crypto.randomUUID()}`,
+    id: newId,
     businessId,
     name: data.name,
     phone: data.phone,
@@ -70,6 +72,14 @@ export async function createLead(data: {
     channelId: channelId,
     status: "new_lead",
   });
+
+  // Send Conversion Event
+  await sendMetaEvent(businessId, "Lead", {
+    id: newId,
+    email: data.email,
+    phone: data.phone,
+  });
+
   revalidatePath("/dashboard/leads");
 }
 

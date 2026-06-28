@@ -214,7 +214,7 @@ CRUD for products and variants per business.
 
 ### ISSUE-008: WhatsApp Business API Integration
 
-**Priority:** P0 | **Status:** 🔴
+**Priority:** P0 | **Status:** 🟢
 
 Connect WhatsApp as a channel for inbound/outbound messaging.
 
@@ -300,7 +300,7 @@ Embeddable lead capture form for landing pages.
 
 ### ISSUE-012: Conversions API (CAPI) — Meta
 
-**Priority:** P0 | **Status:** 🔴
+**Priority:** P0 | **Status:** 🟢
 
 Send server-side conversion events to Meta Ads.
 
