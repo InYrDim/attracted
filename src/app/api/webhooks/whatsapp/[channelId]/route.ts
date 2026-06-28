@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db/drizzle";
-import { channel, lead, conversation, message as messageSchema } from "@/db/schema";
+import { channel, lead, conversation, message as messageSchema, clickLog } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
+import { sendMetaEvent } from "@/lib/meta-capi";
 
 // GET: Meta Webhook Verification
 export async function GET(
@@ -82,15 +83,45 @@ export async function POST(
               });
 
               if (!existingLead) {
+                // Attribution match via IP
+                const ip = req.headers.get("x-forwarded-for") || req.headers.get("remote-addr") || "unknown";
+                const ipHash = crypto.createHash("sha256").update(ip).digest("hex");
+                
+                const recentClick = await db.query.clickLog.findFirst({
+                  where: and(
+                    eq(clickLog.businessId, ch.businessId),
+                    eq(clickLog.ipHash, ipHash)
+                  ),
+                  orderBy: (clickLogs, { desc }) => [desc(clickLogs.createdAt)]
+                });
+
+                const newId = `ld_${crypto.randomUUID()}`;
                 const [newLead] = await db.insert(lead).values({
-                  id: `ld_${crypto.randomUUID()}`,
+                  id: newId,
                   businessId: ch.businessId,
                   channelId: channelId,
                   name: name,
                   phone: phone,
                   status: "new_lead",
+                  clickId: recentClick?.clickId,
+                  utmSource: recentClick?.utmSource,
+                  utmMedium: recentClick?.utmMedium,
+                  utmCampaign: recentClick?.utmCampaign,
                 }).returning();
                 existingLead = newLead;
+
+                if (recentClick && !recentClick.matchedLeadId) {
+                  await db.update(clickLog)
+                    .set({ matchedLeadId: newId })
+                    .where(eq(clickLog.id, recentClick.id));
+                }
+
+                // Send CAPI Event
+                await sendMetaEvent(ch.businessId, "Lead", {
+                  id: newId,
+                  phone: phone,
+                  clickId: recentClick?.clickId,
+                });
               }
 
               // 2. Find or create conversation
@@ -119,7 +150,7 @@ export async function POST(
 
               // 3. Insert Message
               await db.insert(messageSchema).values({
-                id: `msg_${msg.id}`, // use WA message ID for idempotency if possible
+                id: `msg_${msg.id || crypto.randomUUID()}`, // use WA message ID for idempotency if possible
                 conversationId: conv.id,
                 senderType: "lead",
                 content: text,
@@ -132,8 +163,8 @@ export async function POST(
     } else {
       return new NextResponse("Not a WhatsApp event", { status: 404 });
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error("WhatsApp Webhook Error:", err);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return new NextResponse(err.stack || err.message || "Internal Server Error", { status: 500 });
   }
 }

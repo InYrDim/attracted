@@ -277,7 +277,7 @@ Connect TikTok as a channel.
 
 ### ISSUE-011: Web Form Channel
 
-**Priority:** P1 | **Status:** 🔴
+**Priority:** P0 | **Status:** 🟢
 
 Embeddable lead capture form for landing pages.
 
@@ -440,7 +440,7 @@ IF-THEN rule engine configurable per business.
 
 ### ISSUE-018: Lead Intelligence — Click Tracking
 
-**Priority:** P1 | **Status:** 🔴
+**Priority:** P1 | **Status:** 🟢
 
 Capture ad click metadata and attribute leads to specific ads.
 

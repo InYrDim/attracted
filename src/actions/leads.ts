@@ -1,9 +1,10 @@
 "use server";
 import { db } from "@/db/drizzle";
-import { lead, businessMember, channel, conversation } from "@/db/schema";
+import { lead, businessMember, channel, conversation, clickLog } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
+import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 import { Lead, LeadWithRelations, Message } from "@/types";
 import { sendMetaEvent } from "@/lib/meta-capi";
@@ -58,9 +59,26 @@ export async function createLead(data: {
   name: string;
   phone: string;
   email?: string;
+  clickId?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
 }) {
   const businessId = await getBusinessId();
   const channelId = await ensureDefaultChannel(businessId);
+
+  // Attempt to match click_log based on IP/UA
+  const reqHeaders = await headers();
+  const ip = reqHeaders.get("x-forwarded-for") || reqHeaders.get("remote-addr") || "unknown";
+  const ipHash = crypto.createHash("sha256").update(ip).digest("hex");
+  
+  const recentClick = await db.query.clickLog.findFirst({
+    where: and(
+      eq(clickLog.businessId, businessId),
+      eq(clickLog.ipHash, ipHash)
+    ),
+    orderBy: [desc(clickLog.createdAt)]
+  });
 
   const newId = `ld_${crypto.randomUUID()}`;
   await db.insert(lead).values({
@@ -71,7 +89,17 @@ export async function createLead(data: {
     email: data.email,
     channelId: channelId,
     status: "new_lead",
+    clickId: data.clickId || recentClick?.clickId,
+    utmSource: data.utmSource || recentClick?.utmSource,
+    utmMedium: data.utmMedium || recentClick?.utmMedium,
+    utmCampaign: data.utmCampaign || recentClick?.utmCampaign,
   });
+
+  if (recentClick && !recentClick.matchedLeadId) {
+    await db.update(clickLog)
+      .set({ matchedLeadId: newId })
+      .where(eq(clickLog.id, recentClick.id));
+  }
 
   // Send Conversion Event
   await sendMetaEvent(businessId, "Lead", {

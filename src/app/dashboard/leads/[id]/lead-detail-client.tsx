@@ -211,6 +211,19 @@ export function LeadDetailClient({ initialLead, initialMessages }: { initialLead
               </div>
             </div>
           </div>
+          <div className="p-5 border-b border-border space-y-3">
+            <h3 className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Attribution</h3>
+            {initialLead.utmSource || initialLead.clickId ? (
+              <div className="space-y-2 text-xs text-muted-foreground">
+                {initialLead.utmSource && <p><span className="font-medium text-foreground">Source:</span> {initialLead.utmSource}</p>}
+                {initialLead.utmMedium && <p><span className="font-medium text-foreground">Medium:</span> {initialLead.utmMedium}</p>}
+                {initialLead.utmCampaign && <p><span className="font-medium text-foreground">Campaign:</span> {initialLead.utmCampaign}</p>}
+                {initialLead.clickId && <p><span className="font-medium text-foreground">Click ID:</span> {initialLead.clickId.substring(0, 15)}...</p>}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">No attribution data</p>
+            )}
+          </div>
           <div className="p-5 space-y-3">
             <h3 className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Quick Actions</h3>
             <div className="space-y-2">

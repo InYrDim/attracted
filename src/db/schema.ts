@@ -133,6 +133,19 @@ export const automationRule = pgTable("automation_rule", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const clickLog = pgTable("click_log", {
+  id: text("id").primaryKey(),
+  businessId: text("business_id").notNull().references(() => business.id, { onDelete: "cascade" }),
+  clickId: text("click_id"),
+  ipHash: text("ip_hash"),
+  userAgent: text("user_agent"),
+  utmSource: text("utm_source"),
+  utmMedium: text("utm_medium"),
+  utmCampaign: text("utm_campaign"),
+  matchedLeadId: text("matched_lead_id").references(() => lead.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Relations
 export const businessRelations = relations(business, ({ one, many }) => ({
   owner: one(user, {
@@ -147,6 +160,7 @@ export const businessRelations = relations(business, ({ one, many }) => ({
   adAccounts: many(adAccount),
   automationRules: many(automationRule),
   adCampaigns: many(adCampaign),
+  clickLogs: many(clickLog),
 }));
 
 export const businessMemberRelations = relations(businessMember, ({ one, many }) => ({
@@ -196,6 +210,7 @@ export const leadRelations = relations(lead, ({ one, many }) => ({
     fields: [lead.id],
     references: [conversation.leadId],
   }),
+  clickLogs: many(clickLog),
 }));
 
 export const orderRelations = relations(order, ({ one }) => ({
@@ -259,5 +274,16 @@ export const automationRuleRelations = relations(automationRule, ({ one }) => ({
   business: one(business, {
     fields: [automationRule.businessId],
     references: [business.id],
+  }),
+}));
+
+export const clickLogRelations = relations(clickLog, ({ one }) => ({
+  business: one(business, {
+    fields: [clickLog.businessId],
+    references: [business.id],
+  }),
+  matchedLead: one(lead, {
+    fields: [clickLog.matchedLeadId],
+    references: [lead.id],
   }),
 }));
