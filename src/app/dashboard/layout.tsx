@@ -41,6 +41,9 @@ export default async function DashboardLayout({
       name: `${session.user.name}'s Business`,
       slug,
       ownerId: session.user.id,
+      plan: "Starter",
+      onboardingCompleted: false,
+      onboardingData: {},
     });
 
     await db.insert(businessMember).values({
@@ -61,17 +64,11 @@ export default async function DashboardLayout({
           ownerId: session.user.id,
           plan: "Starter",
           createdAt: now,
-          onboardingCompleted: false,
         }}
       >
         {children}
       </AppShell>
     );
-  }
-
-  // Redirect to onboarding if not completed
-  if (!member.business.onboardingCompleted) {
-    redirect("/onboarding");
   }
 
   return (

@@ -48,42 +48,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isAuthPage && isAuthenticated) {
-    // Check onboarding status before redirecting auth pages
-    if (sessionCookie) {
-      try {
-        const bizRes = await fetch(
-          new URL("/api/auth/get-business-status", request.url).toString(),
-          { headers: { cookie: request.headers.get("cookie") || "" } },
-        );
-        if (bizRes.ok) {
-          const biz = await bizRes.json();
-          if (biz.exists && !biz.onboardingCompleted) {
-            return NextResponse.redirect(new URL("/onboarding", request.url));
-          }
-        }
-      } catch (e) {
-        console.error("Proxy business status error:", e);
-      }
-    }
     return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  // Redirect authenticated users to onboarding if they haven't completed it
-  if (isProtected && isAuthenticated && !isOnboardingPage && sessionCookie) {
-    try {
-      const bizRes = await fetch(
-        new URL("/api/auth/get-business-status", request.url).toString(),
-        { headers: { cookie: request.headers.get("cookie") || "" } },
-      );
-      if (bizRes.ok) {
-        const biz = await bizRes.json();
-        if (biz.exists && !biz.onboardingCompleted) {
-          return NextResponse.redirect(new URL("/onboarding", request.url));
-        }
-      }
-    } catch (e) {
-      console.error("Proxy business status error:", e);
-    }
   }
 
   return NextResponse.next();

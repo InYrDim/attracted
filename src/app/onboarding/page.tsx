@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import crypto from "crypto";
+import { OnboardingClient } from "./onboarding-client";
 
 export default async function OnboardingPage() {
   const reqHeaders = await headers();
