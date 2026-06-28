@@ -1,26 +1,13 @@
 "use server";
 import { db } from "@/db/drizzle";
-import { lead, businessMember, channel, conversation, clickLog } from "@/db/schema";
-import { auth } from "@/lib/auth";
+import { lead, channel, conversation, clickLog } from "@/db/schema";
 import { headers } from "next/headers";
 import { eq, and, desc } from "drizzle-orm";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 import { Lead, LeadWithRelations, Message } from "@/types";
 import { sendMetaEvent } from "@/lib/meta-capi";
-
-async function getBusinessId() {
-  const reqHeaders = await headers();
-  const session = await auth.api.getSession({ headers: reqHeaders });
-  if (!session) throw new Error("Unauthorized");
-
-  const member = await db.query.businessMember.findFirst({
-    where: eq(businessMember.userId, session.user.id),
-  });
-
-  if (!member) throw new Error("No business found");
-  return member.businessId;
-}
+import { requireBusinessMember } from "@/lib/auth-utils";
 
 export async function ensureDefaultChannel(businessId: string) {
   const defaultChannel = await db.query.channel.findFirst({
@@ -42,7 +29,7 @@ export async function ensureDefaultChannel(businessId: string) {
 }
 
 export async function getLeads(): Promise<LeadWithRelations[]> {
-  const businessId = await getBusinessId();
+  const { businessId } = await requireBusinessMember("agent");
   return db.query.lead.findMany({
     where: eq(lead.businessId, businessId),
     with: {
@@ -64,14 +51,14 @@ export async function createLead(data: {
   utmMedium?: string;
   utmCampaign?: string;
 }) {
-  const businessId = await getBusinessId();
+  const { businessId } = await requireBusinessMember("agent");
   const channelId = await ensureDefaultChannel(businessId);
 
   // Attempt to match click_log based on IP/UA
   const reqHeaders = await headers();
   const ip = reqHeaders.get("x-forwarded-for") || reqHeaders.get("remote-addr") || "unknown";
   const ipHash = crypto.createHash("sha256").update(ip).digest("hex");
-  
+
   const recentClick = await db.query.clickLog.findFirst({
     where: and(
       eq(clickLog.businessId, businessId),
@@ -112,7 +99,7 @@ export async function createLead(data: {
 }
 
 export async function updateLeadStatus(id: string, status: Lead["status"]) {
-  const businessId = await getBusinessId();
+  const { businessId } = await requireBusinessMember("agent");
   await db
     .update(lead)
     .set({ status, updatedAt: new Date() })
@@ -124,7 +111,7 @@ export async function updateLeadStatus(id: string, status: Lead["status"]) {
 export async function getLeadById(
   id: string,
 ): Promise<LeadWithRelations | undefined> {
-  const businessId = await getBusinessId();
+  const { businessId } = await requireBusinessMember("agent");
   return db.query.lead.findFirst({
     where: and(eq(lead.id, id), eq(lead.businessId, businessId)),
     with: {
@@ -138,9 +125,8 @@ export async function getLeadById(
 }
 
 export async function getLeadMessages(leadId: string): Promise<Message[]> {
-  const businessId = await getBusinessId();
+  const { businessId } = await requireBusinessMember("agent");
 
-  // First, find the conversation for this lead
   const conv = await db.query.conversation.findFirst({
     where: and(
       eq(conversation.leadId, leadId),

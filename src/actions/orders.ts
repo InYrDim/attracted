@@ -7,22 +7,11 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { OrderWithRelations, Order } from "@/types";
 import { sendMetaEvent } from "@/lib/meta-capi";
-
-async function getBusinessId() {
-  const reqHeaders = await headers();
-  const session = await auth.api.getSession({ headers: reqHeaders });
-  if (!session) throw new Error("Unauthorized");
-  
-  const member = await db.query.businessMember.findFirst({
-    where: eq(businessMember.userId, session.user.id),
-  });
-  
-  if (!member) throw new Error("No business found");
-  return member.businessId;
-}
+import { requireBusinessMember } from "@/lib/auth-utils";
+import crypto from "crypto";
 
 export async function getOrders(): Promise<OrderWithRelations[]> {
-  const businessId = await getBusinessId();
+  const { businessId } = await requireBusinessMember("agent");
   return db.query.order.findMany({
     where: eq(order.businessId, businessId),
     with: {
@@ -43,8 +32,8 @@ export async function createOrder(data: {
   shippingCourier?: string;
   trackingNumber?: string;
 }) {
-  const businessId = await getBusinessId();
-  
+  const { businessId } = await requireBusinessMember("agent");
+
   // optionally get the current user as agent
   const reqHeaders = await headers();
   const session = await auth.api.getSession({ headers: reqHeaders });
@@ -93,7 +82,7 @@ export async function createOrder(data: {
 }
 
 export async function updateOrderStatus(id: string, status: Order["status"]) {
-  const businessId = await getBusinessId();
+  const { businessId } = await requireBusinessMember("agent");
   await db.update(order)
     .set({ status, updatedAt: new Date() })
     .where(and(eq(order.id, id), eq(order.businessId, businessId)));

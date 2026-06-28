@@ -22,10 +22,11 @@ export const business = pgTable("business", {
 export const businessMember = pgTable("business_member", {
   id: text("id").primaryKey(),
   businessId: text("business_id").notNull().references(() => business.id, { onDelete: "cascade" }),
-  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
   role: memberRoleEnum("role").default("agent").notNull(),
   invitedAt: timestamp("invited_at").defaultNow(),
   acceptedAt: timestamp("accepted_at"),
+  invitedEmail: text("invited_email"),
 });
 
 export const product = pgTable("product", {
@@ -126,6 +127,7 @@ export const automationRule = pgTable("automation_rule", {
   id: text("id").primaryKey(),
   businessId: text("business_id").notNull().references(() => business.id, { onDelete: "cascade" }),
   trigger: text("trigger").notNull(),
+  name: text("name"),
   conditions: jsonb("conditions"),
   actionType: actionTypeEnum("action_type").notNull(),
   actionConfig: jsonb("action_config"),

@@ -1,28 +1,15 @@
 "use server";
 import { db } from "@/db/drizzle";
-import { conversation, message, businessMember } from "@/db/schema";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { eq, and, desc } from "drizzle-orm";
+import { conversation, message } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
-
-async function getBusinessId() {
-  const reqHeaders = await headers();
-  const session = await auth.api.getSession({ headers: reqHeaders });
-  if (!session) throw new Error("Unauthorized");
-  
-  const member = await db.query.businessMember.findFirst({
-    where: eq(businessMember.userId, session.user.id),
-  });
-  
-  if (!member) throw new Error("No business found");
-  return member.businessId;
-}
+import { requireBusinessMember } from "@/lib/auth-utils";
+import crypto from "crypto";
 
 export async function getConversations() {
-  const businessId = await getBusinessId();
-  
+  const { businessId } = await requireBusinessMember("agent");
+
   return db.query.conversation.findMany({
     where: eq(conversation.businessId, businessId),
     with: {
@@ -37,8 +24,8 @@ export async function getConversations() {
 }
 
 export async function sendInboxMessage(conversationId: string, content: string) {
-  const businessId = await getBusinessId();
-  
+  const { businessId } = await requireBusinessMember("agent");
+
   // Verify conversation belongs to business
   const conv = await db.query.conversation.findFirst({
     where: and(eq(conversation.id, conversationId), eq(conversation.businessId, businessId)),
@@ -47,7 +34,7 @@ export async function sendInboxMessage(conversationId: string, content: string) 
       lead: true,
     }
   });
-  
+
   if (!conv) throw new Error("Conversation not found");
 
   // Send external message if channel is WhatsApp

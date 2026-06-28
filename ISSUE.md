@@ -49,7 +49,7 @@ Implement all application tables in `src/db/schema.ts`:
 
 ### ISSUE-002: Multi-tenant Auth & RBAC
 
-**Priority:** P0 | **Status:** 🟡
+**Priority:** P0 | **Status:** 🟢
 
 Extend better-auth in `src/lib/auth.ts` to support multi-tenancy and role-based access.
 
@@ -361,7 +361,7 @@ Send conversion data to Google Ads.
 
 ### ISSUE-015: Ad Account Management UI
 
-**Priority:** P1 | **Status:** 🟡
+**Priority:** P1 | **Status:** 🟢
 
 Settings UI to connect and manage ad accounts.
 
@@ -405,7 +405,7 @@ Calculate shipping cost and generate tracking numbers.
 
 ### ISSUE-017: Automation Rule Engine
 
-**Priority:** P1 | **Status:** 🟡
+**Priority:** P1 | **Status:** 🟢
 
 IF-THEN rule engine configurable per business.
 
@@ -548,7 +548,7 @@ Agent/CS analytics.
 
 ### ISSUE-023: Team Management
 
-**Priority:** P1 | **Status:** 🟡
+**Priority:** P1 | **Status:** 🟢
 
 Invite and manage team members.
 
