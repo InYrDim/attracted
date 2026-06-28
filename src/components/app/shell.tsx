@@ -15,6 +15,7 @@ const navItems = [
   { href: "/dashboard/leads", label: "Leads", icon: Users },
   { href: "/dashboard/orders", label: "Orders", icon: ShoppingCart },
   { href: "/dashboard/products", label: "Products", icon: Package },
+  { href: "/dashboard/reports", label: "Reports", icon: RadioTower },
   {
     label: "Settings",
     icon: Settings2,

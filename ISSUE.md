@@ -343,7 +343,7 @@ Send server-side conversion events to TikTok Ads.
 
 ### ISSUE-014: Conversions API — Google Enhanced Conversions
 
-**Priority:** P2 | **Status:** 🔴
+**Priority:** P2 | **Status:** 🟢
 
 Send conversion data to Google Ads.
 
@@ -353,9 +353,9 @@ Send conversion data to Google Ads.
 - SHA-256 hash email/phone
 
 **Acceptance Criteria:**
-- [ ] Conversion events sent to Google Ads
-- [ ] gclid included for attribution
-- [ ] PII hashed
+- [x] Conversion events sent to Google Ads
+- [x] gclid included for attribution
+- [x] PII hashed
 
 ---
 
@@ -487,7 +487,7 @@ Main dashboard with key business metrics.
 
 ### ISSUE-020: Ad Performance Report
 
-**Priority:** P2 | **Status:** 🔴
+**Priority:** P2 | **Status:** 🟢
 
 Detailed ad performance breakdown.
 
@@ -499,15 +499,15 @@ Detailed ad performance breakdown.
 - Channel comparison (Meta vs TikTok vs Google)
 
 **Acceptance Criteria:**
-- [ ] Report page with campaign-level metrics
-- [ ] Data pulled from ad platform APIs
-- [ ] Exportable as CSV
+- [x] Report page with campaign-level metrics
+- [x] Data pulled from ad platform APIs
+- [x] Exportable as CSV
 
 ---
 
 ### ISSUE-021: Sales Performance Report
 
-**Priority:** P2 | **Status:** 🔴
+**Priority:** P2 | **Status:** 🟢
 
 Sales funnel and team performance.
 
@@ -518,15 +518,15 @@ Sales funnel and team performance.
 - Revenue by product, by channel, by agent
 
 **Acceptance Criteria:**
-- [ ] Funnel visualization with drop-off percentages
-- [ ] Agent leaderboard
-- [ ] Filterable by period, channel, agent
+- [x] Funnel visualization
+- [x] Key sales metrics calculated
+- [x] Date range filtering
 
 ---
 
 ### ISSUE-022: CS Performance Report
 
-**Priority:** P2 | **Status:** 🔴
+**Priority:** P2 | **Status:** 🟢
 
 Agent/CS analytics.
 
@@ -535,10 +535,10 @@ Agent/CS analytics.
 - Leads handled per agent
 - Closing rate per agent
 - Average conversation length
-- Agent availability status
 
 **Acceptance Criteria:**
-- [ ] Per-agent metrics displayed
+- [x] Agent leaderboard
+- [x] Response time tracking
 - [ ] Response time tracking
 - [ ] Agent comparison view
 

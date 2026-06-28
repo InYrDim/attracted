@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { OrderWithRelations, Order } from "@/types";
 import { sendMetaEvent } from "@/lib/meta-capi";
 import { sendTikTokEvent } from "@/lib/tiktok-capi";
+import { sendGoogleEvent } from "@/lib/google-capi";
 import { requireBusinessMember } from "@/lib/auth-utils";
 import crypto from "crypto";
 import { generateTrackingNumber } from "@/lib/shipping";
@@ -87,6 +88,12 @@ export async function createOrder(data: {
     await sendTikTokEvent(
       businessId, 
       "CompletePayment", 
+      { id: l.id, email: l.email, phone: l.phone, clickId: l.clickId },
+      data.totalPrice
+    );
+    await sendGoogleEvent(
+      businessId, 
+      "Purchase", 
       { id: l.id, email: l.email, phone: l.phone, clickId: l.clickId },
       data.totalPrice
     );

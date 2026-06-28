@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { Lead, LeadWithRelations, Message } from "@/types";
 import { sendMetaEvent } from "@/lib/meta-capi";
 import { sendTikTokEvent } from "@/lib/tiktok-capi";
+import { sendGoogleEvent } from "@/lib/google-capi";
 import { requireBusinessMember } from "@/lib/auth-utils";
 
 export async function ensureDefaultChannel(businessId: string) {
@@ -97,6 +98,13 @@ export async function createLead(data: {
   });
 
   await sendTikTokEvent(businessId, "SubmitForm", {
+    id: newId,
+    email: data.email,
+    phone: data.phone,
+    clickId: data.clickId || recentClick?.clickId,
+  });
+
+  await sendGoogleEvent(businessId, "Lead", {
     id: newId,
     email: data.email,
     phone: data.phone,
