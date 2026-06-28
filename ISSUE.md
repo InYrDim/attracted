@@ -116,7 +116,7 @@ Build the authenticated app layout with sidebar navigation.
 
 ### ISSUE-004: Lead Management
 
-**Priority:** P0 | **Status:** 🟡
+**Priority:** P0 | **Status:** 🟢
 
 Implement lead CRUD, pipeline view, and assignment.
 
@@ -140,7 +140,7 @@ Implement lead CRUD, pipeline view, and assignment.
 
 ### ISSUE-005: Unified Inbox
 
-**Priority:** P0 | **Status:** 🟡
+**Priority:** P0 | **Status:** 🟢
 
 Build the central messaging inbox for CS agents.
 
@@ -168,7 +168,7 @@ Build the central messaging inbox for CS agents.
 
 ### ISSUE-006: Order Management
 
-**Priority:** P1 | **Status:** 🟡
+**Priority:** P1 | **Status:** 🟢
 
 Implement order creation from leads and order tracking.
 
@@ -191,7 +191,7 @@ Implement order creation from leads and order tracking.
 
 ### ISSUE-007: Product Management
 
-**Priority:** P1 | **Status:** 🟡
+**Priority:** P1 | **Status:** 🟢
 
 CRUD for products and variants per business.
 

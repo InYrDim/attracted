@@ -27,3 +27,8 @@ export type ConversationWithRelations = Conversation & {
   channel?: Channel;
   messages?: Message[];
 };
+
+export type OrderWithRelations = Order & {
+  lead: Lead;
+  agent?: (BusinessMember & { user: User }) | null;
+};
