@@ -67,6 +67,27 @@ export async function createInstagramChannel(data: { name: string; igAccountId: 
   return { id: newId };
 }
 
+export async function createTikTokChannel(data: { name: string; ttAccountId: string; accessToken: string; verifyToken: string }) {
+  const { businessId } = await requireBusinessMember("admin");
+
+  const newId = `ch_${crypto.randomUUID()}`;
+  await db.insert(channel).values({
+    id: newId,
+    businessId,
+    type: "tiktok",
+    name: data.name,
+    config: {
+      ttAccountId: data.ttAccountId,
+      accessToken: data.accessToken,
+      verifyToken: data.verifyToken,
+      webhookUrl: `/api/webhooks/tiktok/${newId}`
+    }
+  });
+
+  revalidatePath("/dashboard/settings/channels");
+  return { id: newId };
+}
+
 export async function deleteChannel(channelId: string) {
   const { businessId } = await requireBusinessMember("admin");
 

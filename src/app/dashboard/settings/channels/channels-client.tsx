@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { createWebFormChannel, createInstagramChannel, createWhatsAppChannel, deleteChannel } from "@/actions/channels";
+import { createWebFormChannel, createInstagramChannel, createWhatsAppChannel, createTikTokChannel, deleteChannel } from "@/actions/channels";
 import { Channel } from "@/types";
 
 export default function ChannelsClient({ initialChannels }: { initialChannels: Channel[] }) {
@@ -27,6 +27,7 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: C
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isInstagramModalOpen, setIsInstagramModalOpen] = useState(false);
   const [isWhatsappModalOpen, setIsWhatsappModalOpen] = useState(false);
+  const [isTikTokModalOpen, setIsTikTokModalOpen] = useState(false);
   
   const [formName, setFormName] = useState("");
   const [requireEmail, setRequireEmail] = useState(false);
@@ -41,6 +42,11 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: C
   const [waPhoneNumberId, setWaPhoneNumberId] = useState("");
   const [waToken, setWaToken] = useState("");
   const [waVerifyToken, setWaVerifyToken] = useState("");
+
+  const [ttName, setTtName] = useState("");
+  const [ttAccountId, setTtAccountId] = useState("");
+  const [ttToken, setTtToken] = useState("");
+  const [ttVerifyToken, setTtVerifyToken] = useState("");
 
   const handleCreateForm = async () => {
     if (!formName.trim()) return;
@@ -82,6 +88,24 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: C
         phoneNumberId: waPhoneNumberId,
         accessToken: waToken,
         verifyToken: waVerifyToken
+      });
+      window.location.reload();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCreateTikTok = async () => {
+    if (!ttName.trim() || !ttAccountId.trim() || !ttToken.trim() || !ttVerifyToken.trim()) return;
+    setIsSubmitting(true);
+    try {
+      await createTikTokChannel({
+        name: ttName,
+        ttAccountId,
+        accessToken: ttToken,
+        verifyToken: ttVerifyToken,
       });
       window.location.reload();
     } catch (e) {
@@ -179,6 +203,19 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: C
                       )}
                     </div>
                   )}
+                  {ch.type === "tiktok" && (
+                    <div className="space-y-1">
+                      <p>TikTok Channel ({config?.ttAccountId})</p>
+                      {config?.webhookUrl && (
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[10px] truncate max-w-[200px]">Webhook: {config.webhookUrl}</span>
+                          <button onClick={() => copyToClipboard(window.location.origin + config.webhookUrl)} className="hover:text-foreground">
+                            <Copy className="h-3 w-3" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <p>Created: {new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(ch.createdAt))}</p>
                 </div>
                 <div className="flex items-center gap-2 pt-1">
@@ -228,6 +265,17 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: C
           </div>
           <p className="text-sm font-medium">Connect WhatsApp</p>
           <p className="text-xs text-muted-foreground mt-1">WhatsApp Business API</p>
+        </Card>
+
+        <Card 
+          className="border-border/60 border-dashed flex flex-col items-center justify-center p-8 min-h-[180px] cursor-pointer hover:bg-accent/20 transition-colors"
+          onClick={() => setIsTikTokModalOpen(true)}
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent mb-3">
+            <Plus className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-medium">Connect TikTok</p>
+          <p className="text-xs text-muted-foreground mt-1">Receive DMs in Unified Inbox</p>
         </Card>
       </div>
 
@@ -323,6 +371,41 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: C
             <Button variant="outline" onClick={() => setIsFormModalOpen(false)}>Cancel</Button>
             <Button onClick={handleCreateForm} disabled={isSubmitting || !formName}>
               {isSubmitting ? "Creating..." : "Create Form"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isTikTokModalOpen} onOpenChange={setIsTikTokModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Connect TikTok Business</DialogTitle>
+            <DialogDescription>
+              Connect via TikTok API to receive and reply to DMs.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Channel Name</Label>
+              <Input placeholder="e.g., TikTok Official Store" value={ttName} onChange={(e) => setTtName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>TikTok Account ID</Label>
+              <Input placeholder="TikTok Business Account ID" value={ttAccountId} onChange={(e) => setTtAccountId(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Access Token</Label>
+              <Input type="password" placeholder="TikTok API access token" value={ttToken} onChange={(e) => setTtToken(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Webhook Verify Token</Label>
+              <Input placeholder="Token for webhook challenge" value={ttVerifyToken} onChange={(e) => setTtVerifyToken(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsTikTokModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateTikTok} disabled={isSubmitting || !ttName || !ttAccountId || !ttToken || !ttVerifyToken}>
+              {isSubmitting ? "Connecting..." : "Connect TikTok"}
             </Button>
           </DialogFooter>
         </DialogContent>

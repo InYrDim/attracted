@@ -258,7 +258,7 @@ Connect Instagram as a channel via Meta Graph API.
 
 ### ISSUE-010: TikTok Messaging Integration
 
-**Priority:** P2 | **Status:** 🔴
+**Priority:** P2 | **Status:** 🟢
 
 Connect TikTok as a channel.
 
