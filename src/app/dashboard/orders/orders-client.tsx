@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { OrderWithRelations, LeadWithRelations, Product } from "@/types";
 import { createOrder, updateOrderStatus } from "@/actions/orders";
 
@@ -190,33 +191,33 @@ export function OrdersClient({
         </Tabs>
       </div>
 
-      <div className="rounded-lg border border-border bg-card divide-y divide-border/60">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-border text-xs text-muted-foreground">
-              <th className="px-4 py-2.5 font-medium">Order ID</th>
-              <th className="px-4 py-2.5 font-medium">Lead</th>
-              <th className="px-4 py-2.5 font-medium hidden md:table-cell">Items</th>
-              <th className="px-4 py-2.5 font-medium hidden sm:table-cell">Courier</th>
-              <th className="px-4 py-2.5 font-medium">Status</th>
-              <th className="px-4 py-2.5 font-medium text-right">Total</th>
-              <th className="px-4 py-2.5 font-medium text-right">Date</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border/60">
+      <div className="rounded-lg border border-border bg-card">
+        <Table className="w-full text-left text-sm">
+          <TableHeader>
+            <TableRow className="border-b border-border text-xs text-muted-foreground">
+              <TableHead className="px-4 py-2.5 font-medium h-auto">Order ID</TableHead>
+              <TableHead className="px-4 py-2.5 font-medium h-auto">Lead</TableHead>
+              <TableHead className="px-4 py-2.5 font-medium h-auto hidden md:table-cell">Items</TableHead>
+              <TableHead className="px-4 py-2.5 font-medium h-auto hidden sm:table-cell">Courier</TableHead>
+              <TableHead className="px-4 py-2.5 font-medium h-auto">Status</TableHead>
+              <TableHead className="px-4 py-2.5 font-medium h-auto text-right">Total</TableHead>
+              <TableHead className="px-4 py-2.5 font-medium h-auto text-right">Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="divide-y divide-border/60">
             {filtered.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-sm text-muted-foreground">No orders found.</td>
-              </tr>
+              <TableRow>
+                <TableCell colSpan={7} className="px-4 py-8 text-center text-sm text-muted-foreground">No orders found.</TableCell>
+              </TableRow>
             ) : filtered.map((order) => {
               const itemsCount = Array.isArray(order.items) ? order.items.length : 0;
               return (
-                <tr key={order.id} className="group transition-colors hover:bg-accent/30 cursor-pointer">
-                  <td className="px-4 py-3"><span className="text-xs font-mono text-indigo-600 dark:text-indigo-400 hover:underline">{order.id}</span></td>
-                  <td className="px-4 py-3 font-medium">{order.lead?.name}</td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs hidden md:table-cell">{itemsCount} item(s)</td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs hidden sm:table-cell uppercase">{order.shippingCourier || "—"}</td>
-                  <td className="px-4 py-3">
+                <TableRow key={order.id} className="group transition-colors hover:bg-accent/30 cursor-pointer border-b-0">
+                  <TableCell className="px-4 py-3"><span className="text-xs font-mono text-indigo-600 dark:text-indigo-400 hover:underline">{order.id}</span></TableCell>
+                  <TableCell className="px-4 py-3 font-medium">{order.lead?.name}</TableCell>
+                  <TableCell className="px-4 py-3 text-muted-foreground text-xs hidden md:table-cell">{itemsCount} item(s)</TableCell>
+                  <TableCell className="px-4 py-3 text-muted-foreground text-xs hidden sm:table-cell uppercase">{order.shippingCourier || "—"}</TableCell>
+                  <TableCell className="px-4 py-3">
                     <Select value={order.status} onValueChange={(val) => handleStatusChange(order.id, val)}>
                       <SelectTrigger className={cn("h-6 text-[10px] w-28 px-2 py-0 border-0 shadow-none font-medium", statusColors[order.status])}>
                         <SelectValue />
@@ -229,14 +230,14 @@ export function OrdersClient({
                         <SelectItem value="cancelled">Cancelled</SelectItem>
                       </SelectContent>
                     </Select>
-                  </td>
-                  <td className="px-4 py-3 text-right text-xs font-medium">Rp {order.totalPrice.toLocaleString("id-ID")}</td>
-                  <td className="px-4 py-3 text-right text-xs text-muted-foreground">{new Date(order.createdAt).toLocaleDateString()}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell className="px-4 py-3 text-right text-xs font-medium">Rp {order.totalPrice.toLocaleString("id-ID")}</TableCell>
+                  <TableCell className="px-4 py-3 text-right text-xs text-muted-foreground">{new Date(order.createdAt).toLocaleDateString("en-US")}</TableCell>
+                </TableRow>
               )
             })}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

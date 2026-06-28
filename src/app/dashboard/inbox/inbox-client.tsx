@@ -67,12 +67,12 @@ export function InboxClient({ initialConversations }: { initialConversations: Co
           </div>
           <div className="flex gap-1.5 overflow-x-auto pb-0.5">
             {["WhatsApp", "Instagram", "TikTok", "Manual Entry"].map((ch) => (
-              <button key={ch} onClick={() => setFilter(filter === ch ? null : ch)} className={cn(
-                "shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium border transition-colors",
-                filter === ch ? "bg-primary text-primary-foreground border-primary" : "bg-background border-border text-muted-foreground hover:border-border"
+              <Button variant="outline" size="sm" key={ch} onClick={() => setFilter(filter === ch ? null : ch)} className={cn(
+                "h-6 rounded-full px-2.5 text-[11px] border",
+                filter === ch ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90 hover:text-primary-foreground" : "bg-background text-muted-foreground"
               )}>
                 {ch}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -86,8 +86,8 @@ export function InboxClient({ initialConversations }: { initialConversations: Co
             const lastMsg = conv.messages && conv.messages.length > 0 ? conv.messages[conv.messages.length - 1] : null;
 
             return (
-              <button key={conv.id} onClick={() => setSelectedConvId(conv.id)} className={cn(
-                "flex w-full items-start gap-3 px-3 py-3 border-b border-border/40 transition-colors text-left",
+              <Button variant="ghost" key={conv.id} onClick={() => setSelectedConvId(conv.id)} className={cn(
+                "flex h-auto w-full items-start justify-start gap-3 px-3 py-3 border-b border-border/40 font-normal rounded-none",
                 selected?.id === conv.id ? "bg-accent/60 border-l-2 border-l-primary" : "hover:bg-accent/30 border-l-2 border-l-transparent"
               )}>
                 <div className="relative shrink-0">
@@ -100,14 +100,14 @@ export function InboxClient({ initialConversations }: { initialConversations: Co
                     <p className="text-xs font-medium truncate">{leadName}</p>
                     <span className="shrink-0 text-[10px] text-muted-foreground">{conv.lastMessageAt ? new Date(conv.lastMessageAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ""}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">{lastMsg ? lastMsg.content : "No messages yet"}</p>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5 w-[200px] text-left">{lastMsg ? lastMsg.content : "No messages yet"}</p>
                   <div className="flex items-center gap-2 mt-1.5">
                     <Badge variant="secondary" className={cn("text-[10px] h-4 px-1.5 border-0 rounded", channelColors[channelName] || channelColors["Manual Entry"])}>
                       {channelName}
                     </Badge>
                   </div>
                 </div>
-              </button>
+              </Button>
             );
           })}
         </ScrollArea>
@@ -117,9 +117,9 @@ export function InboxClient({ initialConversations }: { initialConversations: Co
         {selected ? (
           <>
             <div className="flex items-center gap-3 px-4 h-14 border-b border-border shrink-0">
-              <button className="md:hidden mr-1">
+              <Button variant="ghost" size="icon" className="md:hidden mr-1 h-8 w-8 shrink-0" onClick={() => setSelectedConvId(null)}>
                 <ArrowLeft className="h-4 w-4 text-muted-foreground" />
-              </button>
+              </Button>
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-xs font-semibold">
                 {(selected.lead?.name || "U").substring(0,2).toUpperCase()}
               </div>
@@ -188,9 +188,9 @@ export function InboxClient({ initialConversations }: { initialConversations: Co
               </div>
               <div className="flex gap-1.5 mt-2 max-w-3xl mx-auto overflow-x-auto pb-0.5">
                 {templates.map((t) => (
-                  <button key={t} onClick={() => setMsgText(t)} className="shrink-0 rounded-md border border-border bg-background px-2.5 py-1 text-[11px] text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <Button variant="outline" size="sm" key={t} onClick={() => setMsgText(t)} className="h-7 shrink-0 rounded-md px-2.5 text-[11px] text-muted-foreground">
                     {t}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>

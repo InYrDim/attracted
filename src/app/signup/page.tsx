@@ -2,7 +2,11 @@
 import { useState } from "react";
 import { signUp } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -41,23 +45,23 @@ export default function SignupPage() {
         </div>
         <form className="space-y-3" onSubmit={handleSignup}>
           <div className="space-y-1.5">
-            <label htmlFor="name" className="text-xs font-medium">Full Name</label>
-            <input id="name" value={name} onChange={(e) => setName(e.target.value)} type="text" required placeholder="Your name" className="input-base h-10" />
+            <Label htmlFor="name" className="text-xs font-medium">Full Name</Label>
+            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} type="text" required placeholder="Your name" className="h-10" />
           </div>
           <div className="space-y-1.5">
-            <label htmlFor="email" className="text-xs font-medium">Work Email</label>
-            <input id="email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="you@business.com" className="input-base h-10" />
+            <Label htmlFor="email" className="text-xs font-medium">Work Email</Label>
+            <Input id="email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="you@business.com" className="h-10" />
           </div>
           <div className="space-y-1.5">
-            <label htmlFor="password" className="text-xs font-medium">Password</label>
-            <input id="password" value={password} onChange={(e) => setPassword(e.target.value)} type="password" required placeholder="Min. 8 characters" className="input-base h-10" />
+            <Label htmlFor="password" className="text-xs font-medium">Password</Label>
+            <Input id="password" value={password} onChange={(e) => setPassword(e.target.value)} type="password" required placeholder="Min. 8 characters" className="h-10" />
           </div>
-          <button type="submit" disabled={loading} className="btn-primary w-full h-10 text-sm">
+          <Button type="submit" disabled={loading} className="w-full h-10 text-sm">
             {loading ? "Creating..." : "Create Workspace"}
-          </button>
+          </Button>
         </form>
         <p className="text-center text-xs text-muted-foreground">
-          Already have an account? <a href="/login" className="text-primary hover:underline font-medium">Log in</a>
+          Already have an account? <Link href="/login" className="text-primary hover:underline font-medium">Log in</Link>
         </p>
       </div>
     </div>

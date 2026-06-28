@@ -3,6 +3,10 @@ import { useState } from "react";
 import { signIn } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -39,19 +43,19 @@ export default function LoginPage() {
         </div>
         <form className="space-y-3" onSubmit={handleLogin}>
           <div className="space-y-1.5">
-            <label htmlFor="email" className="text-xs font-medium">Email</label>
-            <input id="email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="you@business.com" className="input-base h-10" />
+            <Label htmlFor="email" className="text-xs font-medium">Email</Label>
+            <Input id="email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="you@business.com" className="h-10" />
           </div>
           <div className="space-y-1.5">
-            <label htmlFor="password" className="text-xs font-medium">Password</label>
-            <input id="password" value={password} onChange={(e) => setPassword(e.target.value)} type="password" required placeholder="Enter password" className="input-base h-10" />
+            <Label htmlFor="password" className="text-xs font-medium">Password</Label>
+            <Input id="password" value={password} onChange={(e) => setPassword(e.target.value)} type="password" required placeholder="Enter password" className="h-10" />
           </div>
-          <button type="submit" disabled={loading} className="btn-primary w-full h-10 text-sm">
+          <Button type="submit" disabled={loading} className="w-full h-10 text-sm">
             {loading ? "Logging in..." : "Log In"}
-          </button>
+          </Button>
         </form>
         <p className="text-center text-xs text-muted-foreground">
-          Don&apos;t have an account? <a href="/signup" className="text-primary hover:underline font-medium">Sign up</a>
+          Don&apos;t have an account? <Link href="/signup" className="text-primary hover:underline font-medium">Sign up</Link>
         </p>
       </div>
     </div>

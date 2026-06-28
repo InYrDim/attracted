@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ArrowLeft, CreditCard, Receipt, Crown, CheckCircle2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +25,7 @@ export default function BillingSettingsPage() {
   return (
     <div className="p-4 lg:p-6 space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="h-8 w-8" asChild><a href="/dashboard"><ArrowLeft className="h-4 w-4" /></a></Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8" asChild><Link href="/dashboard"><ArrowLeft className="h-4 w-4" /></Link></Button>
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Billing</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Manage your subscription and invoices.</p>

@@ -156,7 +156,9 @@ export function ProductsClient({ initialProducts }: { initialProducts: Product[]
             <div className="col-span-1 text-right">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="rounded-md p-1 opacity-0 group-hover:opacity-100 hover:bg-accent transition-all"><MoreVertical className="h-3.5 w-3.5 text-muted-foreground" /></button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-all">
+                    <MoreVertical className="h-3.5 w-3.5 text-muted-foreground" />
+                  </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => handleToggleStatus(product.id, product.isActive)}>

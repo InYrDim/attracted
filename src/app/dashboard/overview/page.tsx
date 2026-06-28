@@ -12,6 +12,8 @@ import {
   Target,
   Clock,
   Zap,
+  MessageCircle,
+  Globe,
 } from "lucide-react";
 import {
   Area,
@@ -31,6 +33,15 @@ import { Card } from "@/components/ui/card";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +50,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { InstagramIcon } from "@/components/icons/lucide-instagram";
 const leadTrendData = [
   { day: "Mon", leads: 24, closed: 5 },
   { day: "Tue", leads: 18, closed: 3 },
@@ -63,46 +75,56 @@ const revenueData = [
   { day: "Sat", revenue: 1800000 },
   { day: "Sun", revenue: 1200000 },
 ];
-const recentLeads = [
+const dbLeads = [
   {
     id: 1,
     name: "Siti Nurhaliza",
-    channel: "WhatsApp",
+    channel: { type: "whatsapp" },
     status: "new_lead" as const,
     source: "Meta Campaign: Summer Sale",
-    time: "2 min ago",
+    phone: "08123456789",
+    email: "siti@example.com",
+    createdAt: "2023-10-01",
   },
   {
     id: 2,
     name: "Ahmad Rizki",
-    channel: "Instagram",
+    channel: { type: "instagram" },
     status: "contacted" as const,
     source: "IG DM: Brand Post",
-    time: "15 min ago",
+    phone: "08129876543",
+    email: "ahmad@example.com",
+    createdAt: "2023-10-02",
   },
   {
     id: 3,
     name: "Dewi Sartika",
-    channel: "WhatsApp",
+    channel: { type: "whatsapp" },
     status: "interested" as const,
     source: "TikTok Ad: Flash Sale",
-    time: "42 min ago",
+    phone: "08134567890",
+    email: "dewi@example.com",
+    createdAt: "2023-10-03",
   },
   {
     id: 4,
     name: "Budi Santoso",
-    channel: "Web Form",
+    channel: { type: "webform" },
     status: "new_lead" as const,
     source: "Landing: Promo Ramadhan",
-    time: "1 hour ago",
+    phone: "08139876543",
+    email: "budi@example.com",
+    createdAt: "2023-10-04",
   },
   {
     id: 5,
     name: "Maya Putri",
-    channel: "WhatsApp",
+    channel: { type: "whatsapp" },
     status: "order" as const,
     source: "Meta Campaign: New Arrival",
-    time: "2 hours ago",
+    phone: "08145678901",
+    email: "maya@example.com",
+    createdAt: "2023-10-05",
   },
 ];
 const statusColors: Record<string, string> = {
@@ -115,12 +137,6 @@ const statusColors: Record<string, string> = {
     "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400",
   delivered: "bg-teal-50 text-teal-700 dark:bg-teal-500/10 dark:text-teal-400",
   lost: "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400",
-};
-const channelIcons: Record<string, string> = {
-  WhatsApp: "💬",
-  Instagram: "📸",
-  TikTok: "🎵",
-  "Web Form": "📝",
 };
 const tf = (n: number) =>
   new Intl.NumberFormat("id-ID", {
@@ -293,7 +309,7 @@ export default function DashboardOverviewPage() {
                     border: "1px solid var(--border)",
                     fontSize: 12,
                   }}
-                  formatter={(value: number, name: string) => [
+                  formatter={(value, name) => [
                     value,
                     name === "leads" ? "New Leads" : "Closed",
                   ]}
@@ -332,7 +348,7 @@ export default function DashboardOverviewPage() {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number, name: string) => [
+                  formatter={(value, name) => [
                     `${value}%`,
                     name,
                   ]}
@@ -402,7 +418,7 @@ export default function DashboardOverviewPage() {
                   tickFormatter={(v) => formatRevenue(v)}
                 />
                 <Tooltip
-                  formatter={(value: number) => [tf(value), "Revenue"]}
+                  formatter={(value) => [tf(value as number), "Revenue"]}
                   contentStyle={{
                     borderRadius: 8,
                     border: "1px solid var(--border)",
@@ -466,76 +482,106 @@ export default function DashboardOverviewPage() {
           </Button>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-border text-xs text-muted-foreground">
-                  <th className="px-4 py-2.5 font-medium">Lead</th>
-                  <th className="px-4 py-2.5 font-medium">Channel</th>
-                  <th className="px-4 py-2.5 font-medium">Status</th>
-                  <th className="px-4 py-2.5 font-medium hidden md:table-cell">
-                    Source
-                  </th>
-                  <th className="px-4 py-2.5 font-medium text-right">Time</th>
-                  <th className="px-4 py-2.5 w-10"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {recentLeads.map((lead) => (
-                  <tr
+          <div className="rounded-lg border border-border bg-card">
+            <Table className="w-full text-left text-sm">
+              <TableHeader>
+                <TableRow className="border-b border-border text-xs text-muted-foreground">
+                  <TableHead className="px-4 py-2.5 font-medium h-auto">
+                    Lead Name
+                  </TableHead>
+                  <TableHead className="px-4 py-2.5 font-medium h-auto hidden sm:table-cell">
+                    Contact
+                  </TableHead>
+                  <TableHead className="px-4 py-2.5 font-medium h-auto hidden md:table-cell">
+                    Channel
+                  </TableHead>
+                  <TableHead className="px-4 py-2.5 font-medium h-auto">
+                    Status
+                  </TableHead>
+                  <TableHead className="px-4 py-2.5 font-medium h-auto hidden lg:table-cell text-right">
+                    Date
+                  </TableHead>
+                  <TableHead className="px-4 py-2.5 font-medium h-auto w-10"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="divide-y divide-border/60">
+                {dbLeads.slice(0, 10).map((lead) => (
+                  <TableRow
                     key={lead.id}
-                    className="group transition-colors hover:bg-accent/30 cursor-pointer"
+                    className="group transition-colors hover:bg-accent/30 border-b-0"
                   >
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-accent-foreground">
-                          {lead.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
+                    <TableCell className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400 text-[10px] font-semibold shrink-0">
+                          {lead.name.substring(0, 2).toUpperCase()}
                         </div>
-                        <span className="font-medium">{lead.name}</span>
+                        <Link
+                          href={`/dashboard/leads/${lead.id}`}
+                          className="font-medium text-xs hover:underline truncate max-w-[120px] sm:max-w-none"
+                        >
+                          {lead.name}
+                        </Link>
                       </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-1.5">
-                        <span>{channelIcons[lead.channel]}</span>
-                        <span className="text-muted-foreground">
-                          {lead.channel}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-muted-foreground text-xs hidden sm:table-cell">
+                      {lead.phone || lead.email}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 hidden md:table-cell">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        {lead.channel?.type === "whatsapp" && (
+                          <MessageCircle className="h-3.5 w-3.5 text-emerald-500" />
+                        )}
+                        {lead.channel?.type === "instagram" && (
+                          <InstagramIcon className="h-3.5 w-3.5 text-pink-500" />
+                        )}
+                        {lead.channel?.type === "webform" && (
+                          <Globe className="h-3.5 w-3.5 text-blue-500" />
+                        )}
+
+                        {(!lead.channel?.type ||
+                          lead.channel?.type === "tiktok") && (
+                          <div className="h-3.5 w-3.5 rounded-full bg-zinc-800" />
+                        )}
+                        <span className="capitalize">
+                          {lead.channel?.type || "Manual"}
                         </span>
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={cn("badge", statusColors[lead.status])}>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-4 py-3">
+                      <span
+                        className={cn(
+                          "badge text-[10px]",
+                          statusColors[lead.status],
+                        )}
+                      >
                         {lead.status.replace("_", " ")}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
-                      <span className="truncate block max-w-[220px]">
-                        {lead.source}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right text-muted-foreground">
-                      {lead.time}
-                    </td>
-                    <td className="px-4 py-3">
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-right text-xs text-muted-foreground hidden lg:table-cell">
+                      {new Date(lead.createdAt).toLocaleDateString("en-US")}
+                    </TableCell>
+                    <TableCell className="px-4 py-3">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="rounded-md p-1 opacity-0 group-hover:opacity-100 hover:bg-accent transition-all">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-all"
+                          >
                             <MoreVertical className="h-3.5 w-3.5 text-muted-foreground" />
-                          </button>
+                          </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-36">
                           <DropdownMenuItem>View Details</DropdownMenuItem>
-                          <DropdownMenuItem>Assign Agent</DropdownMenuItem>
-                          <DropdownMenuItem>Change Status</DropdownMenuItem>
+                          <DropdownMenuItem>Message</DropdownMenuItem>
+                          <DropdownMenuItem>Create Order</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>

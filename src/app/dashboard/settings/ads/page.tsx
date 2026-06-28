@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ArrowLeft, Plug, RadioTower, ExternalLink, CheckCircle2, XCircle, RefreshCw, Plus } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,7 @@ export default function AdsSettingsPage() {
   return (
     <div className="p-4 lg:p-6 space-y-5">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="h-8 w-8" asChild><a href="/dashboard"><ArrowLeft className="h-4 w-4" /></a></Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8" asChild><Link href="/dashboard"><ArrowLeft className="h-4 w-4" /></Link></Button>
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Ad Accounts</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Connect ad accounts to track attribution and send CAPI events.</p>

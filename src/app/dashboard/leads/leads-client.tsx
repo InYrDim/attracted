@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { updateLeadStatus } from "@/actions/leads";
 import { LeadWithRelations } from "@/types";
@@ -71,9 +72,9 @@ function LeadCard({ lead }: { lead: LeadWithRelations }) {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="shrink-0 rounded-md p-1 opacity-0 group-hover:opacity-100 hover:bg-accent transition-all">
+            <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-all">
               <MoreVertical className="h-3.5 w-3.5 text-muted-foreground" />
-            </button>
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuItem>View Details</DropdownMenuItem>
@@ -150,16 +151,16 @@ export function LeadsClient({ leads }: { leads: LeadWithRelations[] }) {
             </DialogHeader>
             <form onSubmit={handleCreateLead} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-medium">Name</label>
-                <Input required value={newLead.name} onChange={e => setNewLead({...newLead, name: e.target.value})} placeholder="John Doe" />
+                <Label className="text-xs font-medium">Name</Label>
+                <Input value={newLead.name} onChange={(e) => setNewLead({ ...newLead, name: e.target.value })} required className="h-9 text-sm" />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium">Phone Number</label>
-                <Input required value={newLead.phone} onChange={e => setNewLead({...newLead, phone: e.target.value})} placeholder="+62 812..." />
+                <Label className="text-xs font-medium">Phone Number</Label>
+                <Input value={newLead.phone} onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })} required className="h-9 text-sm" />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium">Email (Optional)</label>
-                <Input type="email" value={newLead.email} onChange={e => setNewLead({...newLead, email: e.target.value})} placeholder="john@example.com" />
+                <Label className="text-xs font-medium">Email (Optional)</Label>
+                <Input value={newLead.email} onChange={(e) => setNewLead({ ...newLead, email: e.target.value })} type="email" className="h-9 text-sm" />
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>

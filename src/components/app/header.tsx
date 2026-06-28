@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { Bell, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const breadcrumbs: Record<string, { parent: string; current: string }> = {
   "/dashboard/inbox": { parent: "Dashboard", current: "Inbox" },
@@ -31,10 +32,10 @@ export function AppHeader() {
           <Search className="absolute left-2.5 top-2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search leads, orders..." className="h-9 w-64 rounded-md pl-8 text-sm bg-muted/50" />
         </div>
-        <button className="relative rounded-md p-2 hover:bg-accent transition-colors">
-          <Bell className="h-4 w-4 text-muted-foreground" />
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive" />
-        </button>
+        <Button variant="ghost" size="icon" className="relative h-9 w-9 text-muted-foreground">
+          <Bell className="h-4 w-4" />
+          <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-red-500 border-2 border-background" />
+        </Button>
       </div>
     </header>
   );

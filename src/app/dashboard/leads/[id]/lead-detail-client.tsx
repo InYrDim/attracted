@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -46,7 +47,7 @@ export function LeadDetailClient({ initialLead, initialMessages }: { initialLead
     <div className="h-[calc(100dvh-56px)] flex flex-col">
       <div className="flex items-center gap-3 px-4 h-14 border-b border-border shrink-0 bg-background">
         <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-          <a href="/dashboard/leads"><ArrowLeft className="h-4 w-4" /></a>
+          <Link href="/dashboard/leads"><ArrowLeft className="h-4 w-4" /></Link>
         </Button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -167,7 +168,7 @@ export function LeadDetailClient({ initialLead, initialMessages }: { initialLead
                         <div key={order.id} className="rounded-lg border border-border p-4 flex items-center justify-between hover:bg-accent/30 transition-colors">
                           <div>
                             <p className="text-sm font-medium">{order.id}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{new Date(order.createdAt).toLocaleDateString()} • {order.totalPrice}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{new Date(order.createdAt).toLocaleDateString("en-US")} • {order.totalPrice}</p>
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary" className={cn("text-[10px] h-4 px-1.5 border-0 rounded", statusColors[order.status])}>{order.status}</Badge>
