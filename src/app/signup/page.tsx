@@ -24,7 +24,7 @@ export default function SignupPage() {
       password,
       fetchOptions: {
         onSuccess: () => {
-          router.push("/dashboard");
+          router.push("/onboarding");
           router.refresh();
         },
         onError: (ctx) => {

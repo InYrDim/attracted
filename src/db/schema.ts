@@ -16,6 +16,8 @@ export const business = pgTable("business", {
   slug: text("slug").notNull().unique(),
   ownerId: text("owner_id").notNull().references(() => user.id, { onDelete: "cascade" }),
   plan: text("plan").default("Starter").notNull(),
+  onboardingCompleted: boolean("onboarding_completed").default(false).notNull(),
+  onboardingData: jsonb("onboarding_data").default({}).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

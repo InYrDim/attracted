@@ -61,11 +61,17 @@ export default async function DashboardLayout({
           ownerId: session.user.id,
           plan: "Starter",
           createdAt: now,
+          onboardingCompleted: false,
         }}
       >
         {children}
       </AppShell>
     );
+  }
+
+  // Redirect to onboarding if not completed
+  if (!member.business.onboardingCompleted) {
+    redirect("/onboarding");
   }
 
   return (
