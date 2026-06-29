@@ -173,7 +173,24 @@ export function AppShell({ children, user, business }: { children: React.ReactNo
               <h1 className="text-sm font-medium text-foreground capitalize">{pathname.split("/").pop()}</h1>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-xs">Pro Plan</Badge>
+              <Badge variant="secondary" className="text-xs hidden sm:inline-flex">Pro Plan</Badge>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-xs h-8"
+                onClick={async () => {
+                  const { signOut } = await import("@/lib/auth-client");
+                  await signOut({
+                    fetchOptions: {
+                      onSuccess: () => {
+                        window.location.href = "/login";
+                      },
+                    },
+                  });
+                }}
+              >
+                Sign out
+              </Button>
               {user?.image ? (
                 <img src={user.image} alt={user.name} className="h-8 w-8 rounded-full ring-2 ring-border object-cover" />
               ) : (
