@@ -42,9 +42,38 @@ export async function getAdAccounts(): Promise<AdAccountWithCampaignCount[]> {
 export async function addAdAccount(
   platform: "meta" | "tiktok" | "google",
   platformAccountId: string,
-  accessToken: string,
+  accessToken: string
 ) {
   const { businessId } = await requireBusinessMember("admin");
+
+  // Verify the credentials with the respective platform API
+  try {
+    if (platform === "meta") {
+      // Graph API to check ad account: /v19.0/{act_id}?access_token=...
+      const actId = platformAccountId.startsWith("act_") ? platformAccountId : `act_${platformAccountId}`;
+      const res = await fetch(`https://graph.facebook.com/v19.0/${actId}?access_token=${accessToken}`);
+      
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(`Meta verification failed: ${err.error?.message || "Invalid token or account ID"}`);
+      }
+    } else if (platform === "tiktok") {
+      // Basic check for TikTok (since their Ads API requires full oauth/app setup, this is a placeholder)
+      // In reality, TikTok requires an app ID and secret to hit their Ads API.
+      // We will do a length check on the token for now, or you can implement the actual /open_api/v1.3/oauth2/advertiser/get/ call.
+      if (accessToken.length < 20) {
+        throw new Error("Invalid TikTok access token format.");
+      }
+    } else if (platform === "google") {
+      // Google Ads API verification (requires developer token + OAuth token in practice)
+      // This is a placeholder for the actual gRPC/REST call
+      if (accessToken.length < 20) {
+        throw new Error("Invalid Google access token format.");
+      }
+    }
+  } catch (err: any) {
+    throw new Error(err.message || "Failed to verify ad account credentials.");
+  }
 
   const id = `ad_${crypto.randomUUID()}`;
   await db.insert(adAccount).values({

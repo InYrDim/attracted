@@ -63,6 +63,8 @@ const PLATFORM_META: Record<AdAccountRow["platform"], { label: string; emoji: st
   google: { label: "Google Ads", emoji: "🔍" },
 };
 
+import { toast } from "sonner";
+
 export default function AdsClient({
   initialAccounts,
 }: {
@@ -102,8 +104,10 @@ export default function AdsClient({
       setPlatform("meta");
       setPlatformAccountId("");
       setAccessToken("");
+      toast.success("Ad account connected successfully");
       await refresh();
-    } catch (e) {
+    } catch (e: any) {
+      toast.error(e.message || "Failed to connect ad account");
       console.error(e);
     } finally {
       setSubmitting(false);
