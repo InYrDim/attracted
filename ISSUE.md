@@ -569,7 +569,7 @@ Invite and manage team members.
 
 ### ISSUE-024: Billing & Plans
 
-**Priority:** P2 | **Status:** 🟡
+**Priority:** P2 | **Status:** 🟢
 
 Subscription management with usage limits.
 
