@@ -21,6 +21,19 @@ export default async function DashboardOverviewPage() {
   const orders = await db.query.order.findMany({
     where: (o, { eq }) => eq(o.businessId, businessId),
   });
+  
+  const messages = await db.query.message.findMany({
+    with: {
+      conversation: {
+        with: {
+          business: true
+        }
+      }
+    }
+  });
 
-  return <OverviewClient initialLeads={leads} initialOrders={orders} />;
+  // Filter messages for current business using the joined relation
+  const businessMessages = messages.filter(m => m.conversation?.businessId === businessId);
+
+  return <OverviewClient initialLeads={leads} initialOrders={orders} initialMessages={businessMessages} />;
 }
