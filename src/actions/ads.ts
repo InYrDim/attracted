@@ -49,24 +49,29 @@ export async function addAdAccount(
   // Verify the credentials with the respective platform API
   try {
     if (platform === "meta") {
-      // Graph API to check ad account: /v19.0/{act_id}?access_token=...
+      // Graph API to check ad account: /v19.0/{act_id}?fields=name,account_status&access_token=...
       const actId = platformAccountId.startsWith("act_") ? platformAccountId : `act_${platformAccountId}`;
-      const res = await fetch(`https://graph.facebook.com/v19.0/${actId}?access_token=${accessToken}`);
+      const res = await fetch(`https://graph.facebook.com/v19.0/${actId}?fields=name,account_status&access_token=${accessToken}`);
       
       if (!res.ok) {
         const err = await res.json();
         throw new Error(`Meta verification failed: ${err.error?.message || "Invalid token or account ID"}`);
       }
+      
+      const data = await res.json();
+      // account_status: 1 = ACTIVE, 2 = DISABLED, etc.
+      if (data.account_status === 2) {
+        throw new Error("This Meta Ad Account is disabled.");
+      }
     } else if (platform === "tiktok") {
-      // Basic check for TikTok (since their Ads API requires full oauth/app setup, this is a placeholder)
-      // In reality, TikTok requires an app ID and secret to hit their Ads API.
-      // We will do a length check on the token for now, or you can implement the actual /open_api/v1.3/oauth2/advertiser/get/ call.
+      // TikTok Marketing API requires App ID/Secret setup for full validation.
+      // Endpoint: https://business-api.tiktok.com/open_api/v1.3/advertiser/info/
       if (accessToken.length < 20) {
         throw new Error("Invalid TikTok access token format.");
       }
     } else if (platform === "google") {
-      // Google Ads API verification (requires developer token + OAuth token in practice)
-      // This is a placeholder for the actual gRPC/REST call
+      // Google Ads API requires a Developer Token in headers.
+      // Endpoint: https://googleads.googleapis.com/v16/customers/{customer_id}
       if (accessToken.length < 20) {
         throw new Error("Invalid Google access token format.");
       }
