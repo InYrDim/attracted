@@ -6,7 +6,7 @@ interface SendMessageParams {
 }
 
 export async function sendWhatsAppMessage({ phoneNumberId, accessToken, to, text }: SendMessageParams) {
-  const url = `https://graph.facebook.com/v19.0/${phoneNumberId}/messages`;
+  const url = `https://graph.facebook.com/v25.0/${phoneNumberId}/messages`;
   
   const payload = {
     messaging_product: "whatsapp",

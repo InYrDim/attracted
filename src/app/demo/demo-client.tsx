@@ -45,7 +45,7 @@ export default function DemoClient({ endpoint, formName }: { endpoint: string; f
           <div className="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-10 h-10" />
           </div>
-          <h2 className="text-3xl font-bold tracking-tight mb-3">You're on the list!</h2>
+          <h2 className="text-3xl font-bold tracking-tight mb-3">You&apos;re on the list!</h2>
           <p className="text-zinc-400 mb-8 leading-relaxed">
             Your lead was successfully injected into Attract CRM. Go check your dashboard to see the magic happen in real-time.
           </p>

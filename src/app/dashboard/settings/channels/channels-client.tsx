@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { createWebFormChannel, createInstagramChannel, createWhatsAppChannel, createTikTokChannel, deleteChannel } from "@/actions/channels";
+import { createWebFormChannel, createInstagramChannel, createWhatsAppChannel, createTikTokChannel, deleteChannel, verifyMetaConnection } from "@/actions/channels";
 import { Channel } from "@/types";
 
 export default function ChannelsClient({ initialChannels }: { initialChannels: Channel[] }) {
@@ -48,6 +48,8 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: C
   const [ttToken, setTtToken] = useState("");
   const [ttVerifyToken, setTtVerifyToken] = useState("");
 
+  const [isVerifying, setIsVerifying] = useState<string | null>(null);
+
   const handleCreateForm = async () => {
     if (!formName.trim()) return;
     setIsSubmitting(true);
@@ -58,6 +60,22 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: C
       console.error(e);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleVerify = async (id: string) => {
+    setIsVerifying(id);
+    try {
+      const res = await verifyMetaConnection(id);
+      if (res.success) {
+        alert(`Connected successfully as: ${res.name} (ID: ${res.id})`);
+      } else {
+        alert(`Connection error: ${res.error}`);
+      }
+    } catch (e: unknown) {
+      alert(`Error: ${(e as Error).message}`);
+    } finally {
+      setIsVerifying(null);
     }
   };
 
@@ -149,7 +167,7 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: C
 
       <div className="grid gap-4 sm:grid-cols-2">
         {channels.map((ch) => {
-          const config = ch.config as any;
+          const config = ch.config as Record<string, string>;
           return (
             <Card key={ch.id} className="border-border/60">
               <div className="p-5 space-y-4">
@@ -227,7 +245,18 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: C
                       </Button>
                     </>
                   )}
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(ch.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                  {(ch.type === "instagram" || ch.type === "whatsapp") && (
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      className="h-8 text-xs flex-1" 
+                      onClick={() => handleVerify(ch.id)}
+                      disabled={isVerifying === ch.id}
+                    >
+                      {isVerifying === ch.id ? "Testing..." : "Test Connection"}
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0" onClick={() => handleDelete(ch.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                 </div>
               </div>
             </Card>
@@ -284,33 +313,19 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: C
           <DialogHeader>
             <DialogTitle>Connect WhatsApp Business</DialogTitle>
             <DialogDescription>
-              Connect via Meta Graph API to receive and reply to WhatsApp messages.
+              Connect your WhatsApp Business account securely via Meta.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Channel Name</Label>
-              <Input placeholder="e.g., WA Customer Service" value={waName} onChange={(e) => setWaName(e.target.value)} />
+          <div className="flex flex-col items-center justify-center space-y-4 py-8">
+            <div className="text-center text-sm text-muted-foreground mb-4">
+              You will be redirected to Meta to grant permissions for Attract to send and receive WhatsApp messages.
             </div>
-            <div className="space-y-2">
-              <Label>Phone Number ID</Label>
-              <Input placeholder="Phone Number ID (from Graph API)" value={waPhoneNumberId} onChange={(e) => setWaPhoneNumberId(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>System User Access Token</Label>
-              <Input type="password" placeholder="System user access token" value={waToken} onChange={(e) => setWaToken(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Webhook Verify Token</Label>
-              <Input placeholder="Token for webhook challenge" value={waVerifyToken} onChange={(e) => setWaVerifyToken(e.target.value)} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsWhatsappModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleCreateWhatsapp} disabled={isSubmitting || !waName || !waPhoneNumberId || !waToken || !waVerifyToken}>
-              {isSubmitting ? "Connecting..." : "Connect WhatsApp"}
+            <Button size="lg" className="w-full bg-[#1877F2] hover:bg-[#1877F2]/90 text-white" asChild>
+              <a href="/api/oauth/meta/login?type=whatsapp">
+                Connect with Meta
+              </a>
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -319,33 +334,19 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: C
           <DialogHeader>
             <DialogTitle>Connect Instagram Business</DialogTitle>
             <DialogDescription>
-              Connect via Meta Graph API to receive and reply to DMs.
+              Connect your Instagram account securely via Meta.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Channel Name</Label>
-              <Input placeholder="e.g., IG Official Store" value={igName} onChange={(e) => setIgName(e.target.value)} />
+          <div className="flex flex-col items-center justify-center space-y-4 py-8">
+            <div className="text-center text-sm text-muted-foreground mb-4">
+              You will be redirected to Meta to grant permissions for Attract to read and reply to your Instagram DMs.
             </div>
-            <div className="space-y-2">
-              <Label>Instagram Account ID</Label>
-              <Input placeholder="IG account ID (from Graph API)" value={igAccountId} onChange={(e) => setIgAccountId(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Page Access Token</Label>
-              <Input type="password" placeholder="System user access token" value={igToken} onChange={(e) => setIgToken(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Webhook Verify Token</Label>
-              <Input placeholder="Token for webhook challenge" value={igVerifyToken} onChange={(e) => setIgVerifyToken(e.target.value)} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsInstagramModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleCreateInstagram} disabled={isSubmitting || !igName || !igAccountId || !igToken || !igVerifyToken}>
-              {isSubmitting ? "Connecting..." : "Connect Instagram"}
+            <Button size="lg" className="w-full bg-[#1877F2] hover:bg-[#1877F2]/90 text-white" asChild>
+              <a href="/api/oauth/meta/login?type=instagram">
+                Connect with Meta
+              </a>
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 

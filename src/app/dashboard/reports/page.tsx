@@ -25,6 +25,10 @@ export default async function ReportsPage() {
   const orders = await db.query.order.findMany({
     where: (o, { eq }) => eq(o.businessId, businessId),
   });
+  
+  const dbCampaigns = await db.query.adCampaign.findMany({
+    where: (c, { eq }) => eq(c.businessId, businessId),
+  });
 
-  return <ReportsClient leads={leads} orders={orders} />;
+  return <ReportsClient leads={leads} orders={orders} dbCampaigns={dbCampaigns} />;
 }

@@ -95,3 +95,36 @@ export async function deleteChannel(channelId: string) {
 
   revalidatePath("/dashboard/settings/channels");
 }
+
+export async function verifyMetaConnection(channelId: string) {
+  const { businessId } = await requireBusinessMember("admin");
+  
+  const ch = await db.query.channel.findFirst({
+    where: and(eq(channel.id, channelId), eq(channel.businessId, businessId))
+  });
+  
+  if (!ch) throw new Error("Channel not found");
+  
+  const config = ch.config as any;
+  if (!config?.accessToken) throw new Error("No access token found");
+  
+  try {
+    const res = await fetch(`https://graph.facebook.com/v19.0/me?access_token=${config.accessToken}&fields=name,id`);
+    const data = await res.json();
+    
+    if (data.error) {
+      throw new Error(data.error.message);
+    }
+    
+    return {
+      success: true,
+      name: data.name,
+      id: data.id
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || "Failed to connect to Meta"
+    };
+  }
+}

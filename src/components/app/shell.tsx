@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Inbox, Users, ShoppingCart, Package, Settings2, ChevronLeft, ChevronRight, Bot, CreditCard, RadioTower, } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger, } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -23,14 +23,15 @@ const navItems = [
       { href: "/dashboard/settings/channels", label: "Channels", icon: RadioTower },
       { href: "/dashboard/settings/ads", label: "Ad Accounts", icon: RadioTower },
       { href: "/dashboard/settings/team", label: "Team", icon: Users },
-      { href: "/dashboard/settings/automation", label: "Automation", icon: Bot },
-      { href: "/dashboard/settings/billing", label: "Billing", icon: CreditCard },
+      { href: "/dashboard/settings/automation", label: "Automation", icon: Bot, disabled: true },
+      { href: "/dashboard/settings/billing", label: "Billing", icon: CreditCard, disabled: true },
     ],
   },
 ];
 
 function SidebarItem({ item, pathname, collapsed }: { item: typeof navItems[0]; pathname: string; collapsed: boolean }) {
   const isActive = item.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(item.href ?? "/dashboard/settings");
+  
   if (item.children) {
     return (
       <div>
@@ -45,21 +46,58 @@ function SidebarItem({ item, pathname, collapsed }: { item: typeof navItems[0]; 
         </div>
         {!collapsed && (
           <div className="ml-7 mt-1 space-y-0.5 border-l border-border pl-3">
-            {item.children.map((child) => (
-              <Link
-                key={child.href}
-                href={child.href}
-                className={cn(
-                  "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
-                  pathname === child.href ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
-                )}
-              >
-                <child.icon className="h-3.5 w-3.5" />
-                {child.label}
-              </Link>
-            ))}
+            {item.children.map((child) => {
+              if (child.disabled) {
+                return (
+                  <div
+                    key={child.href}
+                    className="flex justify-between items-center rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground/50 cursor-not-allowed"
+                    title="Dalam Pengembangan"
+                  >
+                    <div className="flex items-center gap-2">
+                      <child.icon className="h-3.5 w-3.5" />
+                      {child.label}
+                    </div>
+                    <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-muted-foreground/30 text-muted-foreground/60">Dev</Badge>
+                  </div>
+                );
+              }
+              
+              return (
+                <Link
+                  key={child.href}
+                  href={child.href}
+                  className={cn(
+                    "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+                    pathname === child.href ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                  )}
+                >
+                  <child.icon className="h-3.5 w-3.5" />
+                  {child.label}
+                </Link>
+              );
+            })}
           </div>
         )}
+      </div>
+    );
+  }
+
+  // @ts-expect-error - checking if top-level item is disabled just in case
+  if (item.disabled) {
+    return (
+      <div
+        className={cn(
+          "flex justify-between items-center rounded-md px-3 py-2 text-sm font-medium text-muted-foreground/50 cursor-not-allowed",
+          collapsed && "justify-center px-2",
+        )}
+        title="Dalam Pengembangan"
+      >
+        <div className="flex items-center gap-3">
+          <item.icon className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>{item.label}</span>}
+        </div>
+        {!collapsed && <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-muted-foreground/30 text-muted-foreground/60">Dev</Badge>}
       </div>
     );
   }
@@ -79,7 +117,7 @@ function SidebarItem({ item, pathname, collapsed }: { item: typeof navItems[0]; 
   );
 }
 
-function SidebarDesktop({ collapsed, onClose, business }: { collapsed: boolean; onClose: () => void; business: any }) {
+function SidebarDesktop({ collapsed, onClose, business }: { collapsed: boolean; onClose: () => void; business: Record<string, unknown> }) {
   const pathname = usePathname();
   return (
     <aside
@@ -119,7 +157,7 @@ function SidebarDesktop({ collapsed, onClose, business }: { collapsed: boolean; 
   );
 }
 
-function SidebarMobile({ open, onOpenChange, business }: { open: boolean; onOpenChange: (open: boolean) => void; business: any }) {
+function SidebarMobile({ open, onOpenChange, business }: { open: boolean; onOpenChange: (open: boolean) => void; business: Record<string, unknown> }) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="w-[260px] p-0">
@@ -140,7 +178,7 @@ function SidebarMobile({ open, onOpenChange, business }: { open: boolean; onOpen
   );
 }
 
-export function AppShell({ children, user, business }: { children: React.ReactNode; user?: any; business?: any }) {
+export function AppShell({ children, user, business }: { children: React.ReactNode; user?: Record<string, unknown>; business?: Record<string, unknown> }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();

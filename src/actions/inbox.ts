@@ -104,6 +104,13 @@ export async function sendInboxMessage(conversationId: string, content: string) 
     .set({ lastMessageAt: new Date() })
     .where(eq(conversation.id, conversationId));
 
+  if (conv.lead && !conv.lead.firstRespondedAt) {
+    const { lead } = await import("@/db/schema");
+    await db.update(lead)
+      .set({ firstRespondedAt: new Date() })
+      .where(eq(lead.id, conv.leadId));
+  }
+
   revalidatePath("/dashboard/inbox");
   revalidatePath(`/dashboard/leads/${conv.leadId}`);
 }

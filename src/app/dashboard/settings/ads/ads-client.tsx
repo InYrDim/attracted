@@ -3,14 +3,11 @@
 import { useState, useCallback } from "react";
 import {
   ArrowLeft,
-  Plug,
-  ExternalLink,
-  CheckCircle2,
-  XCircle,
   Plus,
   Loader2,
   Trash2,
   Power,
+  ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -65,6 +62,10 @@ const PLATFORM_META: Record<AdAccountRow["platform"], { label: string; emoji: st
 
 import { toast } from "sonner";
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Failed to connect ad account";
+}
+
 export default function AdsClient({
   initialAccounts,
 }: {
@@ -106,8 +107,8 @@ export default function AdsClient({
       setAccessToken("");
       toast.success("Ad account connected successfully");
       await refresh();
-    } catch (e: any) {
-      toast.error(e.message || "Failed to connect ad account");
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e));
       console.error(e);
     } finally {
       setSubmitting(false);
@@ -282,7 +283,8 @@ export default function AdsClient({
             <DialogTitle>Connect Ad Account</DialogTitle>
             <DialogDescription>
               Add a Meta, TikTok, or Google Ads account to start tracking
-              performance.
+              performance. For Meta, use the Ad Account ID and Marketing API
+              access token, not the App ID or App Secret.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -305,18 +307,32 @@ export default function AdsClient({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Account ID</Label>
+              <div className="flex items-center justify-between">
+                <Label>Account ID</Label>
+                {platform === "meta" && (
+                  <a href="https://business.facebook.com/settings/ad-accounts" target="_blank" rel="noreferrer" className="text-[10px] text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors">
+                    Find Account ID <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+              </div>
               <Input
-                placeholder="e.g., act_123456789"
+                placeholder={platform === "meta" ? "e.g., act_123456789" : "Enter account ID"}
                 value={platformAccountId}
                 onChange={(e) => setPlatformAccountId(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label>Access Token</Label>
+              <div className="flex items-center justify-between">
+                <Label>Access Token</Label>
+                {platform === "meta" && (
+                  <a href="https://business.facebook.com/settings/system-users" target="_blank" rel="noreferrer" className="text-[10px] text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors">
+                    Generate Token <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+              </div>
               <Input
                 type="password"
-                placeholder="Paste your access token"
+                placeholder={platform === "meta" ? "Marketing API access token, not App Secret" : "Paste your access token"}
                 value={accessToken}
                 onChange={(e) => setAccessToken(e.target.value)}
               />

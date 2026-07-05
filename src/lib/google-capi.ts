@@ -38,11 +38,11 @@ export async function sendGoogleEvent(
   // Note: True Google Ads Enhanced Conversions via API requires a different endpoint
   // and OAuth, but this is the standard server-side tracking pattern for this stack.
 
-  const userData: Record<string, any> = {};
+  const userData: Record<string, unknown> = {};
   if (leadData.email) userData.sha256_email_address = hashData(leadData.email);
   if (leadData.phone) userData.sha256_phone_number = hashData(leadData.phone);
   
-  const payload: any = {
+  const payload: Record<string, unknown> = {
     client_id: leadData.id, // Using lead ID as client ID for server-side
     user_data: Object.keys(userData).length > 0 ? userData : undefined,
     events: [

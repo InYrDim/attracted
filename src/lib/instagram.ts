@@ -6,7 +6,7 @@ interface SendIGMessageParams {
 }
 
 export async function sendInstagramMessage({ igAccountId, accessToken, to, text }: SendIGMessageParams) {
-  const url = `https://graph.facebook.com/v19.0/${igAccountId}/messages`;
+  const url = `https://graph.facebook.com/v25.0/${igAccountId}/messages`;
   
   const payload = {
     recipient: {

@@ -4,32 +4,56 @@ import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { LeadWithRelations, OrderWithRelations } from "@/types";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { LeadWithRelations } from "@/types";
 
 export default function ReportsClient({ 
   leads, 
-  orders 
+  orders,
+  dbCampaigns 
 }: { 
   leads: LeadWithRelations[],
-  orders: any[] 
+  orders: Record<string, unknown>[],
+  dbCampaigns: Record<string, unknown>[]
 }) {
   const [tab, setTab] = useState("sales");
 
   // Format currency
   const formatIdr = (n: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
 
-  // === Ad Performance Mock Data (We don't have real API data for spend yet) ===
-  const adCampaigns = [
-    { name: "Promo Lebaran (Meta)", spend: 4500000, leads: 320, orders: 45, revenue: 13500000 },
-    { name: "Flash Sale (TikTok)", spend: 2100000, leads: 180, orders: 12, revenue: 3600000 },
-    { name: "Search Brand (Google)", spend: 1200000, leads: 85, orders: 25, revenue: 7500000 },
-  ].map(c => ({
-    ...c,
-    cpl: c.spend / c.leads,
-    roas: (c.revenue / c.spend).toFixed(2),
-    cvr: ((c.orders / c.leads) * 100).toFixed(1) + "%"
-  }));
+  // === Ad Performance Calculation ===
+  // Group by utmCampaign or adCampaign mapping
+  const campaignStats = leads.reduce((acc, lead) => {
+    const campaignName = lead.utmCampaign || "Organic / Direct";
+    if (!acc[campaignName]) {
+      acc[campaignName] = { name: campaignName, spend: 0, leads: 0, orders: 0, revenue: 0 };
+    }
+    acc[campaignName].leads += 1;
+    
+    if (lead.orders && lead.orders.length > 0) {
+      acc[campaignName].orders += lead.orders.length;
+      acc[campaignName].revenue += lead.orders.reduce((sum, o: Record<string, unknown>) => sum + (Number(o.totalPrice) || 0), 0);
+    }
+    
+    return acc;
+  }, {} as Record<string, Record<string, unknown>>);
+
+  const adCampaigns = Object.values(campaignStats).map(c => {
+    // If it's organic, spend is 0. Otherwise, if we have a matching DB campaign, we can use its spend.
+    // Since we don't sync real spend from Meta API yet, we'll assign a mock spend for non-organic for demonstration.
+    const isOrganic = c.name === "Organic / Direct";
+    const dbMatch = dbCampaigns.find(dbC => dbC.name === c.name || dbC.platformCampaignId === c.name);
+    
+    const spend = isOrganic ? 0 : (dbMatch?.metadata?.spend || (c.leads * 12500));
+    
+    return {
+      ...c,
+      spend,
+      cpl: c.leads > 0 && spend > 0 ? spend / c.leads : 0,
+      roas: spend > 0 ? (c.revenue / spend).toFixed(2) : (c.revenue > 0 ? "∞" : "0.00"),
+      cvr: c.leads > 0 ? ((c.orders / c.leads) * 100).toFixed(1) + "%" : "0.0%"
+    };
+  }).sort((a, b) => b.leads - a.leads);
 
   // === Sales Performance Aggregation ===
   const statusCounts = leads.reduce((acc, lead) => {
@@ -50,18 +74,33 @@ export default function ReportsClient({
   const agentData = leads.reduce((acc, lead) => {
     if (!lead.assignedAgentId) return acc;
     const name = lead.assignedAgent?.user?.name || "Unknown Agent";
-    if (!acc[name]) acc[name] = { name, leads: 0, orders: 0, responseTime: Math.floor(Math.random() * 15) + 2 };
+    if (!acc[name]) acc[name] = { name, leads: 0, orders: 0, totalResponseMs: 0, respondedLeads: 0 };
     acc[name].leads++;
     if (lead.status === "order" || lead.status === "delivered") acc[name].orders++;
+    
+    if (lead.firstRespondedAt) {
+      const createdTime = new Date(lead.createdAt).getTime();
+      const respondedTime = new Date(lead.firstRespondedAt).getTime();
+      const diffMs = Math.max(0, respondedTime - createdTime);
+      acc[name].totalResponseMs += diffMs;
+      acc[name].respondedLeads++;
+    }
+    
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, Record<string, unknown>>);
 
-  const csStats = Object.values(agentData).map((a: any) => ({
-    ...a,
-    closingRate: ((a.orders / a.leads) * 100).toFixed(1) + "%"
-  }));
+  const csStats = Object.values(agentData).map((a: Record<string, any>) => {
+    const avgResponseMs = a.respondedLeads > 0 ? a.totalResponseMs / a.respondedLeads : 0;
+    const avgResponseMins = Math.round(avgResponseMs / (1000 * 60));
+    
+    return {
+      ...a,
+      responseTime: avgResponseMins > 0 ? avgResponseMins : (a.respondedLeads > 0 ? "<1" : "-"),
+      closingRate: a.leads > 0 ? ((a.orders / a.leads) * 100).toFixed(1) + "%" : "0.0%"
+    };
+  });
 
-  const COLORS = ['#4f46e5', '#0ea5e9', '#10b981', '#f59e0b'];
+
 
   return (
     <div className="p-4 lg:p-6 space-y-6">

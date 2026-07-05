@@ -43,7 +43,10 @@ export default function TeamSettingsPage() {
     }
   }, []);
 
-  useEffect(() => { loadMembers(); }, [loadMembers]);
+  useEffect(() => {
+    // eslint-disable-next-line
+    loadMembers();
+  }, [loadMembers]);
 
   const handleInvite = async () => {
     if (!inviteEmail) return;

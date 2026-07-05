@@ -5,7 +5,6 @@ import { db } from "@/db/drizzle";
 import { business, businessMember } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
-import crypto from "crypto";
 
 export default async function DashboardLayout({
   children,
@@ -29,46 +28,8 @@ export default async function DashboardLayout({
     },
   });
 
-  // Fallback: user signed up via better-auth but databaseHooks didn't run,
-  // or they're accepting an invite. Create a business on the fly.
-  if (!member || !member.business) {
-    const bId = `bus_${crypto.randomUUID()}`;
-    const mId = `mem_${crypto.randomUUID()}`;
-    const now = new Date();
-    const slug = `bus-${now.getTime()}`;
-    await db.insert(business).values({
-      id: bId,
-      name: `${session.user.name}'s Business`,
-      slug,
-      ownerId: session.user.id,
-      plan: "Starter",
-      onboardingCompleted: false,
-      onboardingData: {},
-    });
-
-    await db.insert(businessMember).values({
-      id: mId,
-      businessId: bId,
-      userId: session.user.id,
-      role: "owner",
-      acceptedAt: now,
-    });
-
-    return (
-      <AppShell
-        user={session.user}
-        business={{
-          id: bId,
-          name: `${session.user.name}'s Business`,
-          slug,
-          ownerId: session.user.id,
-          plan: "Starter",
-          createdAt: now,
-        }}
-      >
-        {children}
-      </AppShell>
-    );
+  if (!member || !member.business || !member.business.onboardingCompleted) {
+    redirect("/onboarding");
   }
 
   return (

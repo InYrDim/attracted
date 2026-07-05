@@ -32,7 +32,7 @@ export async function sendMetaEvent(
 
   const pixelId = account.accountId;
 
-  const userData: Record<string, any> = {
+  const userData: Record<string, unknown> = {
     client_user_agent: "AttractCRM-System", // We can use actual UA if captured during webform submit
   };
 
@@ -42,7 +42,7 @@ export async function sendMetaEvent(
 
   const eventId = eventName === "Lead" ? `lead_${leadData.id}` : `purchase_${leadData.id}_${Date.now()}`;
 
-  const payload: any = {
+  const payload: Record<string, unknown> = {
     data: [
       {
         event_name: eventName,
@@ -61,7 +61,7 @@ export async function sendMetaEvent(
     };
   }
 
-  const url = `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${account.accessToken}`;
+  const url = `https://graph.facebook.com/v25.0/${pixelId}/events?access_token=${account.accessToken}`;
 
   try {
     const res = await fetch(url, {

@@ -23,11 +23,81 @@ export async function updateBusinessOnboardingStep(
 }
 
 export async function completeOnboarding() {
-  const { businessId } = await requireBusinessMember("owner");
+  const { businessId, userId } = await requireBusinessMember("owner");
+  
+  const b = await db.query.business.findFirst({
+    where: eq(business.id, businessId),
+  });
+
+  if (!b) return;
+
+  const data = (b.onboardingData as Record<string, any>) || {};
+
+  // Update business details
+  if (data.businessName || data.businessSlug) {
+    await db
+      .update(business)
+      .set({
+        name: data.businessName || b.name,
+        slug: data.businessSlug || b.slug,
+      })
+      .where(eq(business.id, businessId));
+  }
+
+  // Create Product
+  if (data.productName && data.productPrice) {
+    const { product } = await import("@/db/schema");
+    const crypto = await import("crypto");
+    await db.insert(product).values({
+      id: `prod_${crypto.randomUUID()}`,
+      businessId,
+      name: data.productName,
+      basePrice: data.productPrice,
+    });
+  }
+
+  // Create Channel
+  if (data.channelName && data.channelType) {
+    const { channel } = await import("@/db/schema");
+    const crypto = await import("crypto");
+    await db.insert(channel).values({
+      id: `chan_${crypto.randomUUID()}`,
+      businessId,
+      name: data.channelName,
+      type: data.channelType as any,
+    });
+  }
+
+  // Invite Team Member
+  if (data.invitedEmail) {
+    const { businessMember } = await import("@/db/schema");
+    const crypto = await import("crypto");
+    await db.insert(businessMember).values({
+      id: `mem_${crypto.randomUUID()}`,
+      businessId,
+      role: "agent",
+      invitedEmail: data.invitedEmail,
+    });
+  }
+
+  // Connect Ad Account
+  if (data.adPlatform && data.adAccountId) {
+    const { adAccount } = await import("@/db/schema");
+    const crypto = await import("crypto");
+    await db.insert(adAccount).values({
+      id: `ad_${crypto.randomUUID()}`,
+      businessId,
+      platform: data.adPlatform as any,
+      accountId: data.adAccountId,
+    });
+  }
+
+  // Mark as completed and clear data
   await db
     .update(business)
     .set({ onboardingCompleted: true, onboardingData: {} })
     .where(eq(business.id, businessId));
+    
   revalidatePath("/onboarding");
   revalidatePath("/dashboard");
 }
